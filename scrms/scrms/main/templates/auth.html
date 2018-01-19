@@ -1,0 +1,21 @@
+<html>
+{% include 'crumbs/head.html' %}
+  <body>
+      <div class="container">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-6 form-auth-box">
+              <form class="form-signin" method="post" action="/auth/">
+                      {% csrf_token %}
+                      <h2 class="form-signin-heading"><i style="color:#fff">SCRIMS</i></h2>
+                        <label for="inputEmail" class="sr-only">{{lang.0.auth.0.email}}</label>
+                        <input type="email" id="inputEmail" name="email" class="form-control dark_input" placeholder="{{lang.0.auth.0.email}}" required="" autofocus="">
+                        <label for="inputPassword" class="sr-only">{{lang.0.auth.0.pass}}</label>
+                        <input type="password" id="inputPassword" name="password" class="form-control dark_input" placeholder="{{lang.0.auth.0.pass}}" required="">
+                        <br>
+                      <button class="btn btn-outline-success form-control" type="submit">{{lang.0.auth.0.enter}}</button>
+              </form>
+          </div>
+        </div>
+      </div>
+  </body>
+</html>
