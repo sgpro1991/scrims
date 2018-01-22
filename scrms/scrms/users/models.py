@@ -5,7 +5,7 @@ from scrms.settings import MEDIA_URL
 class User(models.Model):
     image = models.ImageField(upload_to='user/', blank=True, verbose_name='')
     name = models.CharField(max_length=100,blank=True)
-    password = models.CharField(max_length=50,)
+    password = models.CharField(max_length=150,)
     email = models.CharField(max_length=255)
     phone = models.CharField(max_length=255, blank=True)
     position = models.CharField(max_length=255)

@@ -1,8 +1,11 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from scrms.settings import BASE_DIR,LANG
 from users.models import User
+from django.utils.crypto import get_random_string
+import os
+import json
 # Create your views here.
 
 
@@ -16,11 +19,11 @@ class Crypto:
 
     def Encrypt(self,text):
         self.text = text
-        return str(self.fernet.encrypt(bytes(self.text.encode('utf-8')))).replace('b','').replace("'","")
+        return str(self.fernet.encrypt(bytes(self.text.encode('utf-8')))).replace("b'",'').replace("'","")
 
     def Decrypt(self,text):
         self.text = text
-        return self.fernet.decrypt(self.text)
+        return str(self.fernet.decrypt(bytes(text.encode('utf-8')))).replace("b'",'').replace("'","")
 
 
 
@@ -28,32 +31,109 @@ class Crypto:
 
 
 
-def Auth():
-    print(BASE_DIR)
+
+
+def Auth(request):
+    email = request.POST.get('email',False)
+    password = request.POST.get('password',False)
+    if email and password:
+        if User.objects.filter(email=email).exists():
+            a = User.objects.get(email=email)
+            user_pass = Crypto().Decrypt(a.password)
+            if user_pass == password:
+                resp = HttpResponse(status=200)
+                token = get_random_string(length=32)
+                resp.set_cookie('SCRIMS_TOKEN',token)
+
+                with open(BASE_DIR+'/sessions/'+token,'w',encoding='utf-8') as f:
+                     json = '[{"id":"'+str(a.id)+'","name":"'+a.name+'","email":"'+a.email+'","position":"'+a.position+'"}]'
+                     f.write(Crypto().Encrypt(json))
+                return resp
+
+            else:
+                return HttpResponse(status=404)
+        else:
+            return HttpResponse(status=404)
+    else:
+        return render(request,'auth.html',{'lang':LANG})
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def CheckAuth(request):
+    try:
+        check = os.path.exists(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
+        if check == True:
+            f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
+            return (Crypto().Decrypt(f.read()))
+        else:
+            return False
+    except:
+        return False
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 
 
 def AuthForm(request):
-    email = request.POST.get('email',False)
-    password = request.POST.get('password',False)
-    if email and password:
-    #    try:
-    #        User
-        return HttpResponse(2)
+    if CheckAuth(request) == False:
+        pass
     else:
-        return render(request,'auth.html',{'lang':LANG})
+        return redirect('/')
+    return render(request,'auth.html',{'lang':LANG,
+                                       'title':LANG[0]['auth'][0]['title']
+                                       })
+
+
+
+
+
+
+
+
+
+
+
 
 
 
 def Main(request):
-    a = Crypto()
-
-    print(a.Encrypt('21312312 312321321'))
-
-    print(a.Decrypt(b'gAAAAABaYcE_p9Bsj5k57DstrxZ4A7gbW9GZxeKfcaTGIzovmfbAx9v7cU7xL_S8fV-SwJMg9wIWYaKfHje2j-KO3tTp6fhqVv3Ph_vM4I-QndRjngyHyVg='))
-
-    #print(get_random_string(length=32))
-    Auth()
-    return HttpResponse(1)
+    if CheckAuth(request) == False:
+        return redirect('/auth/')
+    else:
+        user = CheckAuth(request)
+    print(user)
+    return render(request,"home.html",{'user':json.dumps(user)})

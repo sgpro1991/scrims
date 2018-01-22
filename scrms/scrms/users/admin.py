@@ -6,30 +6,22 @@ from django.utils.crypto import get_random_string
 
 
 
-
-
-
-
-
-
-
-#encoded_text = frn.encrypt(bytes(text.encode('utf-8')))
-#decoded_text = frn.decrypt(encoded_text)
-
-
 class UserAdmin(admin.ModelAdmin):
     fields = ('image', 'image_tag','name','password','email','phone','position','subordinate','about')
     readonly_fields = ('image_tag',)
     def save_model(self, request, obj, form, change):
         obj.user = request.user
         if obj.id is None:
-            password = get_random_string(length=8)
+            password = get_random_string(length=6)
             crypt = Crypto().Encrypt(password)
         else:
             crypt = ''
         super().save_model(request, obj, form, change)
         if crypt != '':
+            print(crypt)
             User.objects.filter(id=obj.id).update(password=crypt)
+
+
 
 
 

@@ -6,4 +6,5 @@ from .views import *
 urlpatterns = [
     path('', Main),
     path('auth/', AuthForm),
+    path('authorize/', Auth),
 ]
