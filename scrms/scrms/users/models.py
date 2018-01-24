@@ -2,6 +2,7 @@ from django.db import models
 from django.utils.html import mark_safe
 from scrms.settings import MEDIA_URL
 
+
 class User(models.Model):
     image = models.ImageField(upload_to='user/', blank=True, verbose_name='')
     name = models.CharField(max_length=100,blank=True)

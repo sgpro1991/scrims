@@ -69,12 +69,12 @@
 }
 
 .gn-menu-main > li:last-child {
-		float: right;
+
 		border-right: none;
 		border-left: 1px solid #c6d0da;
 }
 
-.gn-menu-main > li > a {
+.gn-menu-main > li > b {
 		padding: 0 30px;
 		text-transform: uppercase;
 		letter-spacing: 1px;

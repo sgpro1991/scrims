@@ -1,3 +1,4 @@
+{% load thumbnail %}
 <div class="container">
   <ul id="gn-menu" class="gn-menu-main">
     <li class="gn-trigger">
@@ -30,21 +31,22 @@
         </div><!-- /gn-scroller -->
       </nav>
     </li>
-    <li><a href="http://tympanus.net/codrops">Codrops</a></li>
+    <li><b>SCRIMS</b></li>
 
     <li>
-      <div class="btn-group">
-         <div  class=" dropdown-toggle" data-toggle="dropdown">
-             Dropdown
-             <span class="caret"></span>
-           </div>
-         <ul class="dropdown-menu">
-           <li><a href="#">Dropdown ссылка</a></li>
-           <li><a href="#">Dropdown ссылка</a></li>
-         </ul>
-       </div>
+        <div class="btn-group">
+           <div class="dropdown-toggle dropdown-box" data-toggle="dropdown">
+                {% thumbnail user.image "50x50" crop="center" as im %}
+                  <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                {% endthumbnail %}
 
-
+                {{user.name}}
+               <span class="caret"></span>
+             </div>
+           <ul class="dropdown-menu">
+             <li><a href="/personal/user/{{user.id}}/">{{lang.0.menu.0.profile}}</a></li>
+           </ul>
+         </div>
     </li>
   </ul>
 </div>

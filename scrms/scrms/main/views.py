@@ -6,9 +6,6 @@ from users.models import User
 from django.utils.crypto import get_random_string
 import os
 import json
-# Create your views here.
-
-
 
 
 class Crypto:
@@ -23,7 +20,8 @@ class Crypto:
 
     def Decrypt(self,text):
         self.text = text
-        return str(self.fernet.decrypt(bytes(text.encode('utf-8')))).replace("b'",'').replace("'","")
+        decryptor = self.fernet.decrypt(bytes(text.encode('utf-8')))
+        return str(decryptor.decode('utf-8'))
 
 
 
@@ -46,7 +44,7 @@ def Auth(request):
                 resp.set_cookie('SCRIMS_TOKEN',token)
 
                 with open(BASE_DIR+'/sessions/'+token,'w',encoding='utf-8') as f:
-                     json = '[{"id":"'+str(a.id)+'","name":"'+a.name+'","email":"'+a.email+'","position":"'+a.position+'"}]'
+                     json = '[{"id":"'+str(a.id)+'"}]'
                      f.write(Crypto().Encrypt(json))
                 return resp
 
@@ -55,7 +53,12 @@ def Auth(request):
         else:
             return HttpResponse(status=404)
     else:
-        return render(request,'auth.html',{'lang':LANG})
+        if CheckAuth(request) == False:
+            pass
+        else:
+            return redirect('/')
+
+        return render(request,'auth.html',{'lang':LANG,'title':LANG[0]['auth'][0]['title']})
 
 
 
@@ -83,7 +86,7 @@ def CheckAuth(request):
     try:
         check = os.path.exists(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
         if check == True:
-            f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
+            f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'],encoding='utf-8')
             return (Crypto().Decrypt(f.read()))
         else:
             return False
@@ -113,6 +116,7 @@ def AuthForm(request):
         pass
     else:
         return redirect('/')
+
     return render(request,'auth.html',{'lang':LANG,
                                        'title':LANG[0]['auth'][0]['title']
                                        })
@@ -135,5 +139,7 @@ def Main(request):
         return redirect('/auth/')
     else:
         user = CheckAuth(request)
-    print(user)
-    return render(request,"home.html",{'user':json.dumps(user)})
+    json_user = json.loads(user)
+    user_data = User.objects.get(pk=json_user[0]['id'])
+    users = User.objects.all()[0:10]
+    return render(request,"home.html",{'user':user_data,'users':users,'lang':LANG})

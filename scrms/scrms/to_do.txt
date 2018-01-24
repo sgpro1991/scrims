@@ -1,0 +1,4 @@
+instalition:
+
+1 get Hostanme (domain) for websockets 
+2

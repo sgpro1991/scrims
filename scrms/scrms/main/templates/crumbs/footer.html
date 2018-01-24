@@ -10,7 +10,20 @@
 <script src="/static/js/vendor/gnmenu.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/static/js/vendor/socket.io.js"></script>
 
 <script>
-  new gnMenu( document.getElementById( 'gn-menu' ) );
+
+var socket = io.connect('http://127.0.0.1:3000');
+
+
+window.onclick = function(){
+    socket.emit('chat message', '{"user":"13","type":"text","body":"lalal"}');
+    socket.on('chat message', function (data) {
+      console.log(JSON.parse(data));
+    });
+
+}
+
+  new gnMenu( document.getElementById( 'gn-menu' ));
 </script>

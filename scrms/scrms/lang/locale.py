@@ -6,7 +6,13 @@ RU = [
             "pass":"Пароль",
             "empty":"Пустые поля!",
             "wrong":"Не верный логин или пароль!",
-    }]}
+    }],
+    "menu":[{
+        "profile":"Профиль",
+
+    }]
+
+    }
 ]
 
 
@@ -14,8 +20,7 @@ RU = [
 
 
 
-EN = [
-    {
+EN = [{
     "auth":[{
             "title":"Sign in to SCRIMS",
             "enter":"Sign in",
@@ -23,7 +28,9 @@ EN = [
             "pass":"Password",
             "empty":"Empty password or login!",
             "wrong":"Wrong login or password!",
+    }],
+    "menu":[{
+        "profile":"Profile",
     }]
 
-    }
-]
+}]
