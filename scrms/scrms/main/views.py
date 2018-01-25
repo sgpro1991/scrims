@@ -8,6 +8,9 @@ import os
 import json
 
 
+
+
+
 class Crypto:
     from cryptography.fernet import Fernet
     from crypto.key import KEY
@@ -86,7 +89,7 @@ def CheckAuth(request):
     try:
         check = os.path.exists(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
         if check == True:
-            f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'],encoding='utf-8')
+            f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'], encoding='utf-8')
             return (Crypto().Decrypt(f.read()))
         else:
             return False
@@ -141,5 +144,5 @@ def Main(request):
         user = CheckAuth(request)
     json_user = json.loads(user)
     user_data = User.objects.get(pk=json_user[0]['id'])
-    users = User.objects.all()[0:10]
+    users = User.objects.all()
     return render(request,"home.html",{'user':user_data,'users':users,'lang':LANG})

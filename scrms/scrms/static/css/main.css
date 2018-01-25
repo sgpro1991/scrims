@@ -12,6 +12,30 @@
 
 
 
+   #scrims_chat_canvas::-webkit-scrollbar-track
+   {
+   	background-color: transparent;
+    width: 3px;
+   }
+
+   #scrims_chat_canvas::-webkit-scrollbar
+   {
+   	width: 5px;
+   	background-color: transparent;
+   }
+
+   #scrims_chat_canvas::-webkit-scrollbar-thumb
+   {
+   	background-color: #293a46;
+    width: 3px;
+   }
+
+.message-main-receive{
+      margin: 2px 0;
+}
+.scrims_chat_count_message{
+      margin: 0 25px;
+}
 
    .fa-2x {
      font-size: 1.5em;
@@ -312,12 +336,14 @@
    .message {
      padding: 0 !important;
      margin: 0 !important;
-     background: url("w.jpg") no-repeat fixed center;
+     /*background: url("w.jpg") no-repeat fixed center;*/
      background-size: cover;
+     background: #b5b5b5;
      overflow-y: auto;
      border: 1px solid #f7f7f7;
      height: calc(100% - 120px);
    }
+
    .message-previous {
      margin : 0 !important;
      padding: 0 !important;

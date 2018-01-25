@@ -1,4 +1,6 @@
 instalition:
 
-1 get Hostanme (domain) for websockets 
-2
+1 get Hostanme (domain) for websockets
+2 в чате поиск и сортировку юзеров делать js
+3 Подумать может вообще обойцтись без jquery и bootstrap js
+4 язык moment js английский русский
