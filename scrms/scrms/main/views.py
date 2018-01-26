@@ -90,7 +90,8 @@ def CheckAuth(request):
         check = os.path.exists(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
         if check == True:
             f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'], encoding='utf-8')
-            return (Crypto().Decrypt(f.read()))
+            json_user = json.loads(Crypto().Decrypt(f.read()))
+            return (json_user)
         else:
             return False
     except:
@@ -142,7 +143,7 @@ def Main(request):
         return redirect('/auth/')
     else:
         user = CheckAuth(request)
-    json_user = json.loads(user)
-    user_data = User.objects.get(pk=json_user[0]['id'])
-    users = User.objects.all()
+    print(user[0]['id'])
+    user_data = User.objects.get(pk=user[0]['id'])
+    users = User.objects.all().exclude(pk=user[0]['id'])
     return render(request,"home.html",{'user':user_data,'users':users,'lang':LANG})

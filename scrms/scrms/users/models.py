@@ -28,17 +28,15 @@ class User(models.Model):
 from django.utils import timezone
 
 class Message(models.Model):
-    now = timezone.now()
     TYPE_CHOICES = (
         ('1', 'text'),
         ('2', 'img'),
         ('3', 'file'),
         ('4', 'link'),
-
     )
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     companion = models.IntegerField(null=True)
     text = models.TextField()
-    type_msg = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False)
+    type_msg = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False,blank=True)
     date = models.DateTimeField(null=True)
     reading = models.BooleanField(default=False)

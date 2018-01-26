@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User
+from .models import User,Message
 from main.views import Crypto
 from django.utils.crypto import get_random_string
 from sorl.thumbnail import get_thumbnail
@@ -28,7 +28,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 
-
+admin.site.register(Message)
 admin.site.register(User,UserAdmin)
 
 # Register your models here.

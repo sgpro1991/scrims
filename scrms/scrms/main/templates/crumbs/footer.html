@@ -4,16 +4,16 @@
 
 
 
-
+<!-- babel-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
-
+<!-- /babel-->
 
 
 <!-- MOMENT js-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/locale/ru.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/locale/en-au.js"></script>
-
+<!-- /MOMENT js-->
 
 
 
@@ -62,16 +62,11 @@ var csrf_token = "{{csrf_token}}"
 function CHAT(){
 
 
-
-
-
-
   function SELECT_COMPANION(id){
 
       let user = USERS.filter(data => data.id==id)
 
       $('#scrims_chat_canvas').attr("data-init",id)
-
       $('#scrims_chat_heading').empty()
       $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-3 heading-avatar" data-init="${user[0].id}">
             <div class="heading-avatar-icon">
@@ -79,27 +74,86 @@ function CHAT(){
             </div>
             </div>
           <div class="col-sm-8 col-xs-7 heading-name">
-            <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
-            </a>
+            <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}</a>
             <span class="heading-online">Online</span>
           </div>`)
+
+          GET_HISTORY(id)
+
 
   }
 
 
+
+  function GET_HISTORY(id){
+
+              MAIN_AJAX_GET('/api/get-history/?companion='+id).then(function(result){
+
+                  $('#scrims_chat_canvas').empty()
+                  $.each(result,function(k,v){
+                      if(v.message=='recive'){
+                        var cls_mess = 'receiver'
+                      }else {
+                        var cls_mess = 'sender'
+                      }
+
+                      let date = moment(v.date).calendar()
+                      //if(date == ){
+
+                      //}
+
+                      $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_${v.message}">
+                          <div class="col-sm-12 message-main-${cls_mess}">
+                            <div class="${cls_mess}">
+                              <div class="message-text">
+                                ${v.body}
+                              </div>
+                              <span class="message-time pull-right">
+                                ${moment(v.date).calendar()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>`)
+                  })
+                  $('#scrims_chat_textarea').val('')
+                  $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
+
+              })
+  }
+
+
+
+  function MAIN_AJAX_GET(url){
+    let data = fetch(url,{
+        credentials: "same-origin"
+      }).then(res => res.json())
+        .catch(function(error) {
+        alert(error);
+      })
+      return(data)
+  }
+
+
   function SEND_AJAX_MESSAGE(msg_object){
-    $.ajax({
-      url:'/api/send_message/',
+
+    if(isNaN(msg_object.companion) == true){return false}//if not found recipient
+
+    let data = $.ajax({
+      url:'/api/send-message/',
       type:'POST',
       data:msg_object,
       success:function(data){
           socket.emit('chat message',msg_object);
       },statusCode:{
-        403:function(){
-          window.location.reload()
+        403:error => window.location.reload(),
+        400:function(){
+          return false
         }
       }
     })
+
+    return data
+    console.log(data,'111')
   }
 
 
@@ -111,64 +165,32 @@ function CHAT(){
 
 function SEND_MESSAGE(id_user,id_companion,type,message){
 
-  let msg = message.replace(/\n/g, "").replace(/\s/g, "")
+  let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
   if(msg === ''){return false}
   message = message.replace(/\n/g, "<br>")
 
   var date = moment().format('YYYY-MM-DD HH:mm:ss')
   let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
 
-  SEND_AJAX_MESSAGE(msg_object)
-
-
-  $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_main">
-            <div class="col-sm-12 message-main-sender">
-              <div class="sender">
-                <div class="message-text">
-                  ${message}
-                </div>
-                <span class="message-time pull-right">
-                  ${moment().calendar()}
-                </span>
-              </div>
-            </div>
-          </div>`)
-
-
-    $('#scrims_chat_textarea').val('')
-    $('#scrims_chat_canvas').animate({scrollTop:$('#scrims_chat_canvas').prop('scrollHeight')},"slow")
+  if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
+  SCROLL_TO_BOTTOM()
 
 }
 
 
-//actions
-  $('#scrims_chat_send').on('click',function(){
-      SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
-
-  })
-
-
-  $('#scrims_chat_textarea').bind('keypress', function(event) {
-      if((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
-        SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
-      }
-  });
+//smooth scroll to bottom when action(recive send) message
+function SCROLL_TO_BOTTOM(){
+  $('#scrims_chat_textarea').val('')
+  $('#scrims_chat_canvas').animate({scrollTop:$('#scrims_chat_canvas').prop('scrollHeight')},"slow")
+}
 
 
-
-  $('.scrims_chat_companion').off('click')
-  $('.scrims_chat_companion').on('click',function(){
-    SELECT_COMPANION($(this).attr('data-init'))
-  })
-//end actions
-
-
-function PARSER_RECIVE_MESSAGE(data){
-  console.log(data,$('#scrims_chat_canvas').attr('data-init'))
-
+function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
+  // Парсим сообщение которое пришло нам т.е. reciver
   if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
+
     $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_receiver">
-              <div class="col-sm-12 message-main-receive">
+              <div class="col-sm-12 message-main-receiver">
                 <div class="receiver">
                   <div class="message-text">
                     ${data.body}
@@ -180,28 +202,71 @@ function PARSER_RECIVE_MESSAGE(data){
               </div>
             </div>`)
 
-  }else if (data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) != data.user) {
-
-    function lala(){
-
-    }
-
-      $('.scrims_chat_companion').each(function() {
-        if($(this).attr('data-init') == data.user){
-          $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">1</b>')
-          $('.scrims_chat_count_message').shake()
-        }
-      })
-  }
+          SCROLL_TO_BOTTOM()
 
 
+  }  // Парсим сообщение которое мы отправили
+  else if(data.user === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.companion){
+
+        $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_main">
+            <div class="col-sm-12 message-main-sender">
+              <div class="sender">
+                <div class="message-text">
+                  ${data.body}
+                </div>
+                <span class="message-time pull-right">
+                  ${moment().calendar()}
+                </span>
+              </div>
+            </div>
+          </div>`)
+
+          SCROLL_TO_BOTTOM() //bltv r ybpe
+
+   }
+
+   MESSAGE_NO_SEE(data)
 
 
 }
 
 
-socket.on('chat message',data=>PARSER_RECIVE_MESSAGE(data))
 
+// if user not see recive message while no open contact or close chat
+function MESSAGE_NO_SEE(data){
+  if (data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) != data.user) {
+        $('.scrims_chat_companion').each(function() {
+          if($(this).attr('data-init') == data.user){
+            $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">1</b>')
+          }
+        })
+    }
+}
+
+socket.on('chat message',data=>PARSER_RECIVE_AND_SENDER_MESSAGE(data))
+
+
+
+//actions
+  //click on "send icon" send message
+  $('#scrims_chat_send').on('click',function(){
+      SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
+  })
+
+ //ctr+enter send message
+  $('#scrims_chat_textarea').bind('keypress', function(event) {
+      if((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
+        SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val() )
+      }
+  });
+
+
+
+  $('.scrims_chat_companion').off('click')
+  $('.scrims_chat_companion').on('click',function(){
+    SELECT_COMPANION($(this).attr('data-init'))
+  })
+//end actions
 
 }
 

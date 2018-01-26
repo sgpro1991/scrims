@@ -4,5 +4,6 @@ from .views import *
 
 
 urlpatterns = [
-    path('send_message/', SendMessage),
+    path('send-message/', SendMessage),
+    path('get-history/', GetHistory),
 ]
