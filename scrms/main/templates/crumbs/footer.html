@@ -1,0 +1,314 @@
+{% load thumbnail %}
+<footer></footer>
+<script src="/static/js/vendor/modernizr-3.5.0.min.js"></script>
+
+
+
+<!-- babel-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
+<!-- /babel-->
+
+
+<!-- MOMENT js-->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/moment.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/locale/ru.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.20.1/locale/en-au.js"></script>
+<!-- /MOMENT js-->
+
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js" ></script>
+<script>window.jQuery || document.write('<script src="/static/js/vendor/jquery-3.2.1.min.js"><\/script>')</script>
+<script src="/static/js/plugins.js"></script>
+<script src="/static/js/main.js"></script>
+
+
+
+<script src="/static/js/vendor/noty.js"></script>
+<script src="/static/js/vendor/classie.js"></script>
+<script src="/static/js/vendor/gnmenu.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
+<script src="/static/js/vendor/socket.io.js"></script>
+
+<script>
+  new gnMenu( document.getElementById( 'gn-menu' ));
+</script>
+
+
+<!-- SCRIMS CHAT -->
+<script type="text/babel">
+
+const USER_ID = {{user.id}}
+const USERS = [{% for item in users  %}{"id":"{{item.id}}","name":"{{item.name}}","img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}"},{% endfor %}]
+
+//config
+moment.locale("ru");
+var socket = io.connect({secure: true});
+var csrf_token = "{{csrf_token}}"
+
+//config
+
+
+function CHAT(){
+
+
+  function SELECT_COMPANION(id){
+
+      let user = USERS.filter(data => data.id==id)
+
+      $('#scrims_chat_canvas').attr("data-init",id)
+      $('#scrims_chat_heading').empty()
+      $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-3 heading-avatar" data-init="${user[0].id}">
+            <div class="heading-avatar-icon">
+              <img src="${user[0].img}">
+            </div>
+            </div>
+          <div class="col-sm-8 col-xs-7 heading-name">
+            <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}</a>
+            <span class="heading-online">Online</span>
+          </div>`)
+
+          GET_HISTORY(id)
+
+
+  }
+
+
+
+  function GET_HISTORY(id){
+              MAIN_AJAX_GET('/api/get-history/?companion='+id).then(function(result){
+
+                  $('#scrims_chat_canvas').empty()
+                  $.each(result,function(k,v){
+                      if(v.message=='recive'){
+                        var cls_mess = 'receiver'
+                      }else {
+                        var cls_mess = 'sender'
+                      }
+
+                      let date = moment(v.date).calendar()
+                      //if(date == ){
+
+                      //}
+                      $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_${v.message}" data-init="${v.id}">
+                          <div class="col-sm-12 message-main-${cls_mess}">
+                            <div class="${cls_mess}">
+                              <div class="message-text">
+                                ${v.body}
+                              </div>
+                              <span class="message-time pull-right">
+                                ${moment(v.date).calendar()}
+                              </span>
+                            </div>
+                          </div>
+                        </div>`)
+                  })
+                  $('#scrims_chat_textarea').val('')
+                  $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
+
+              })
+  }
+
+
+
+  function MAIN_AJAX_GET(url){
+    let data = fetch(url,{
+        credentials: "same-origin"
+      }).then(res => res.json())
+        .catch(function(error) {
+        alert(error);
+      })
+      return(data)
+  }
+
+
+  function SEND_AJAX_MESSAGE(msg_object){
+
+    if(isNaN(msg_object.companion) == true){return false}//if not found recipient
+
+    let data = $.ajax({
+      url:'/api/send-message/',
+      type:'POST',
+      data:msg_object,
+      success:function(data){
+          msg_object.id_msg = data
+          socket.emit('chat message',msg_object);
+      },statusCode:{
+        403:error => window.location.reload(),
+        400:function(){
+          return false
+        }
+      }
+    })
+
+    return data
+    console.log(data,'111')
+  }
+
+
+
+
+
+
+
+
+function SEND_MESSAGE(id_user,id_companion,type,message){
+
+  let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
+  if(msg === ''){return false}
+  message = message.replace(/\n/g, "<br>")
+
+  var date = moment().format('YYYY-MM-DD HH:mm:ss')
+  let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
+
+  if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
+  SCROLL_TO_BOTTOM()
+  $('#scrims_chat_textarea').val('')
+
+}
+
+
+//smooth scroll to bottom when action(recive send) message
+function SCROLL_TO_BOTTOM(){
+  $('#scrims_chat_canvas').animate({scrollTop:$('#scrims_chat_canvas').prop('scrollHeight')},"slow")
+}
+
+
+function STATUS_CONECTED(data){
+
+
+  MAIN_AJAX_GET('/api/status-chat/?token='+data.token+'&status='+data.status).then(function(result){
+    if(data.status == 'on'){
+      $('.scrims_chat_companion').each(function(){
+        var id = $(this).attr('data-init')
+        if(id == result){
+          $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_offline').addClass('scrims_chat_status_online')
+        }
+      })
+    }
+    if(data.status == 'off'){
+      $('.scrims_chat_companion').each(function(){
+        var id = $(this).attr('data-init')
+        if(id == result){
+          $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_online').addClass('scrims_chat_status_offline')
+        }
+      })
+    }
+  })
+}
+
+
+function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
+
+  // Парсим сообщение которое пришло нам т.е. reciver
+  if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
+
+    $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_receiver" data-init="${data.id_msg}">
+              <div class="col-sm-12 message-main-receiver">
+                <div class="receiver">
+                  <div class="message-text">
+                    ${data.body}
+                  </div>
+                  <span class="message-time pull-right">
+                    ${moment().calendar()}
+                  </span>
+                </div>
+              </div>
+            </div>`)
+
+          SCROLL_TO_BOTTOM()
+
+
+  }  // Парсим сообщение которое мы отправили
+  else if(data.user === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.companion){
+
+        $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_main" data-init="${data.id_msg}">
+            <div class="col-sm-12 message-main-sender">
+              <div class="sender">
+                <div class="message-text">
+                  ${data.body}
+                </div>
+                <span class="message-time pull-right">
+                  ${moment().calendar()}
+                </span>
+              </div>
+            </div>
+          </div>`)
+
+          SCROLL_TO_BOTTOM() //bltv r ybpe
+
+   }
+
+   MESSAGE_NO_SEE(data)
+
+
+}
+
+
+
+// if user not see recive message while no open contact or close chat
+function MESSAGE_NO_SEE(data){
+  if (data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) != data.user) {
+        $('.scrims_chat_companion').each(function() {
+          if($(this).attr('data-init') == data.user){
+            $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">1</b>')
+          }
+        })
+    }
+
+
+
+}
+
+socket.on('chat message',data=>PARSER_RECIVE_AND_SENDER_MESSAGE(data))
+
+
+socket.on('chat status',data=>STATUS_CONECTED(data))
+
+
+
+
+
+//actions
+  //click on "send icon" send message
+  $('#scrims_chat_send').on('click',function(){
+      SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
+  })
+
+ //ctr+enter send message
+  $('#scrims_chat_textarea').bind('keypress', function(event) {
+      if((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
+        SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val() )
+      }
+  });
+
+
+
+  $('.scrims_chat_companion').off('click')
+  $('.scrims_chat_companion').on('click',function(){
+    $('.scrims_chat_companion').removeClass('cleanstate_chat_companion')
+    $(this).addClass('cleanstate_chat_companion');
+    SELECT_COMPANION($(this).attr('data-init'))
+  })
+//end actions
+
+}
+
+$(document).ready(function(){
+
+  function getCookie(name) {
+    var matches = document.cookie.match(new RegExp(
+      "(?:^|; )" + name.replace(/([\.$?*|{}\(\)\[\]\\\/\+^])/g, '\\$1') + "=([^;]*)"
+    ));
+    return matches ? decodeURIComponent(matches[1]) : undefined;
+  }
+
+  CHAT()
+
+  socket.emit('chat status',{"token":getCookie("SCRIMS_TOKEN"),"status":"on"});
+
+})
+
+
+</script>
