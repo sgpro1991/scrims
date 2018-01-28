@@ -20,22 +20,23 @@ io.on('connection', function(socket){
     // end if user connect to chat
 
     socket.on('chat status', function(msg){
-      console.log(msg)
       io.emit('chat status', msg);
     });
 
 
     socket.on('chat message', function(msg){
-      console.log(msg)
       io.emit('chat message', msg);
     });
 
     socket.on('disconnect', function(){
+      console.log(socket,'\n============================')
       var cookie = socket.handshake.headers.cookie
-      var regexp = /SCRIMS_TOKEN=.*;/;
+      var regexp = /SCRIMS_TOKEN=([A-Z]{32})/;
       var str = cookie.match(regexp)
+      console.log(str,"===========================111111111111111111111111")
       try{
         io.emit('chat status', {"token":str[0].replace('SCRIMS_TOKEN=','').replace(';',''),"status":"off"});
+        console.log({"token":str[0].replace('SCRIMS_TOKEN=','').replace(';',''),"status":"off"})
       }catch(error){
         console.log(error)
       }

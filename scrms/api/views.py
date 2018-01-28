@@ -62,6 +62,45 @@ def SetStatus(request):
 
 
 
+def GetHistoryAbout(request):
+    if CheckAuth(request) == False:
+        return HttpResponse(status=403)
+    else:
+        pass
+
+    user = CheckAuth(request)[0]['id']
+    companion = request.GET.get('companion',False)
+    limit = request.GET.get('limit',False)
+
+    count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
+    if count < (count-int(limit)-10):
+        data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+    else:
+        print(count-int(limit)-10,count-int(limit))
+        data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[count-int(limit)-10:count-int(limit)]
+
+
+    mass = []
+    for a in data:
+        if int(a.companion) == int(companion):
+            message = 'main'
+        else:
+            message = 'recive'
+
+        mass.append({
+            'id':a.id,
+            'user':a.user.id,
+            'body':Crypto().Decrypt(a.text),
+            'companion':a.companion,
+            'message':message,
+            'date':str(a.date)
+        })
+
+    return HttpResponse(json.dumps(mass))
+
+
+
+
 
 
 
@@ -78,14 +117,17 @@ def GetHistory(request):
     if companion == False:
         return HttpResponse(status=404)
 
+
     count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
+
     if count < 10:
         data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
     else:
         data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[(count-10):count]
 
 
-    print(count)
+
+
     mass = []
     for a in data:
         if int(a.companion) == int(companion):

@@ -75,39 +75,80 @@ function CHAT(){
   }
 
 
+  function PREVIOUS_MESSAGE(id){
+
+    var limit = ($('.scrims_chat_msg_main').length)+($('.scrims_chat_msg_recive').length)
+
+    MAIN_AJAX_GET('/api/get-history-about/?companion='+id+'&limit='+limit).then(function(result){
+
+        //$('#scrims_chat_canvas').empty()
+
+
+        PARSER_MSG_HISTORY(result)
+        $('#scrims_chat_textarea').val('')
+        $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
+
+    })
+
+  }
+
+
 
   function GET_HISTORY(id){
               MAIN_AJAX_GET('/api/get-history/?companion='+id).then(function(result){
 
                   $('#scrims_chat_canvas').empty()
-                  $.each(result,function(k,v){
-                      if(v.message=='recive'){
-                        var cls_mess = 'receiver'
-                      }else {
-                        var cls_mess = 'sender'
-                      }
-
-                      let date = moment(v.date).calendar()
-                      //if(date == ){
-
-                      //}
-                      $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_${v.message}" data-init="${v.id}">
-                          <div class="col-sm-12 message-main-${cls_mess}">
-                            <div class="${cls_mess}">
-                              <div class="message-text">
-                                ${v.body}
-                              </div>
-                              <span class="message-time pull-right">
-                                ${moment(v.date).calendar()}
-                              </span>
-                            </div>
+                  $('#scrims_chat_canvas').html(`<div class="row message-previous"  data-init="${id}">
+                          <div class="col-sm-12 previous">
+                            <b>
+                            Show Previous Message!
+                            <b>
                           </div>
                         </div>`)
-                  })
+
+                  $('.message-previous').click(a => PREVIOUS_MESSAGE(id))
+
+
+                  PARSER_MSG_HISTORY(result)
                   $('#scrims_chat_textarea').val('')
                   $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
 
               })
+  }
+
+
+
+
+
+
+
+
+
+  function PARSER_MSG_HISTORY(result){
+    $.each(result.reverse(),function(k,v){
+        if(v.message=='recive'){
+          var cls_mess = 'receiver'
+        }else {
+          var cls_mess = 'sender'
+        }
+
+        let date = moment(v.date).calendar()
+        //if(date == ){
+
+        //}
+        $('#scrims_chat_canvas').prepend(`<div class="row message-body scrims_chat_msg_${v.message}" data-init="${v.id}">
+            <div class="col-sm-12 message-main-${cls_mess}">
+              <div class="${cls_mess}">
+                <div class="message-text">
+                  ${v.body}
+                </div>
+                <span class="message-time pull-right">
+                  ${moment(v.date).calendar()}
+                </span>
+              </div>
+            </div>
+          </div>`)
+    })
   }
 
 
@@ -117,7 +158,7 @@ function CHAT(){
         credentials: "same-origin"
       }).then(res => res.json())
         .catch(function(error) {
-        alert(error);
+        console.log(error);
       })
       return(data)
   }
@@ -262,8 +303,6 @@ function MESSAGE_NO_SEE(data){
 }
 
 socket.on('chat message',data=>PARSER_RECIVE_AND_SENDER_MESSAGE(data))
-
-
 socket.on('chat status',data=>STATUS_CONECTED(data))
 
 
@@ -293,7 +332,8 @@ socket.on('chat status',data=>STATUS_CONECTED(data))
   })
 //end actions
 
-}
+
+}//end chat
 
 $(document).ready(function(){
 
@@ -303,6 +343,7 @@ $(document).ready(function(){
     ));
     return matches ? decodeURIComponent(matches[1]) : undefined;
   }
+
 
   CHAT()
 
