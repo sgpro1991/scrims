@@ -4,6 +4,15 @@
 
 
 
+
+
+
+<!-- dropzone -->
+<script src="/static/js/vendor/dropzone.js"></script>
+<!-- /dropzone -->
+
+
+
 <!-- babel-->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-core/5.8.34/browser.min.js"></script>
 <!-- /babel-->
@@ -71,6 +80,7 @@ function CHAT(){
 
           GET_HISTORY(id)
 
+          $('#scrims_chat_textarea').focus()
 
   }
 
@@ -81,12 +91,9 @@ function CHAT(){
 
     MAIN_AJAX_GET('/api/get-history-about/?companion='+id+'&limit='+limit).then(function(result){
 
-        //$('#scrims_chat_canvas').empty()
+      $('.message-previous').remove()
 
-
-        PARSER_MSG_HISTORY(result)
-        $('#scrims_chat_textarea').val('')
-        $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
+      PARSER_MSG_HISTORY(id,result)
 
     })
 
@@ -98,18 +105,7 @@ function CHAT(){
               MAIN_AJAX_GET('/api/get-history/?companion='+id).then(function(result){
 
                   $('#scrims_chat_canvas').empty()
-                  $('#scrims_chat_canvas').html(`<div class="row message-previous"  data-init="${id}">
-                          <div class="col-sm-12 previous">
-                            <b>
-                            Show Previous Message!
-                            <b>
-                          </div>
-                        </div>`)
-
-                  $('.message-previous').click(a => PREVIOUS_MESSAGE(id))
-
-
-                  PARSER_MSG_HISTORY(result)
+                  PARSER_MSG_HISTORY(id,result)
                   $('#scrims_chat_textarea').val('')
                   $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
 
@@ -124,7 +120,9 @@ function CHAT(){
 
 
 
-  function PARSER_MSG_HISTORY(result){
+  function PARSER_MSG_HISTORY(id,result){
+
+
     $.each(result.reverse(),function(k,v){
         if(v.message=='recive'){
           var cls_mess = 'receiver'
@@ -133,10 +131,8 @@ function CHAT(){
         }
 
         let date = moment(v.date).calendar()
-        //if(date == ){
 
-        //}
-        $('#scrims_chat_canvas').prepend(`<div class="row message-body scrims_chat_msg_${v.message}" data-init="${v.id}">
+        $('#scrims_chat_canvas').prepend(`<div class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}" style="display:none">
             <div class="col-sm-12 message-main-${cls_mess}">
               <div class="${cls_mess}">
                 <div class="message-text">
@@ -149,6 +145,21 @@ function CHAT(){
             </div>
           </div>`)
     })
+
+    $('.message-body').fadeIn('slow')
+
+    if(result.length>=10){
+
+    $('#scrims_chat_canvas').prepend(`<div class="row message-previous"  data-init="${id}">
+            <div class="col-sm-12 previous">
+              <b>
+              Show Previous Message!
+              <b>
+            </div>
+          </div>`)
+      }
+
+      $('.message-previous').click(a => PREVIOUS_MESSAGE(id))
   }
 
 
@@ -217,26 +228,26 @@ function SCROLL_TO_BOTTOM(){
 
 
 function STATUS_CONECTED(data){
+    var token = data.token.replace(' ','')
+    console.log(data.id_user,data.status)
 
+      if(data.status == 'on'){
+        $('.scrims_chat_companion').each(function(){
+          var id = $(this).attr('data-init')
+          if(id == data.id_user){
+            $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_offline').addClass('scrims_chat_status_online')
+          }
+        })
+      }
+      if(data.status == 'off'){
+        $('.scrims_chat_companion').each(function(){
+          var id = $(this).attr('data-init')
+          if(id == data.id_user){
+            $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_online').addClass('scrims_chat_status_offline')
+          }
+        })
+      }
 
-  MAIN_AJAX_GET('/api/status-chat/?token='+data.token+'&status='+data.status).then(function(result){
-    if(data.status == 'on'){
-      $('.scrims_chat_companion').each(function(){
-        var id = $(this).attr('data-init')
-        if(id == result){
-          $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_offline').addClass('scrims_chat_status_online')
-        }
-      })
-    }
-    if(data.status == 'off'){
-      $('.scrims_chat_companion').each(function(){
-        var id = $(this).attr('data-init')
-        if(id == result){
-          $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_online').addClass('scrims_chat_status_offline')
-        }
-      })
-    }
-  })
 }
 
 
@@ -311,6 +322,10 @@ socket.on('chat status',data=>STATUS_CONECTED(data))
 
 //actions
   //click on "send icon" send message
+
+
+
+
   $('#scrims_chat_send').on('click',function(){
       SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
   })
@@ -335,7 +350,19 @@ socket.on('chat status',data=>STATUS_CONECTED(data))
 
 }//end chat
 
+
+
 $(document).ready(function(){
+
+  Dropzone.autoDiscover = false;
+
+  var myDropzone = new Dropzone("#dropzone-chat");
+  myDropzone.on("success", function(data) {
+    console.log(data)
+    /* Maybe display some more file information on your page */
+  });
+
+
 
   function getCookie(name) {
     var matches = document.cookie.match(new RegExp(
@@ -347,7 +374,12 @@ $(document).ready(function(){
 
   CHAT()
 
-  socket.emit('chat status',{"token":getCookie("SCRIMS_TOKEN"),"status":"on"});
+  $(window).on("blur focus", function(e) {
+    console.log('lala')
+    socket.emit('chat status',{"token":getCookie("SCRIMS_TOKEN"),"status":"on"})
+  })
+
+
 
 })
 

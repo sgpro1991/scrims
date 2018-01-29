@@ -309,12 +309,24 @@
       </div>
 
 
-
-      <div id="scrims_chat_canvas" class="row message" id="conversation">
-
+      <div id="scrims_chat_canvas_previous"></div>
 
 
-      </div>
+
+      <div id="scrims_chat_canvas" class="row message" id="conversation"></div>
+
+
+      <div class="box-uploader file">
+          <form action="/file-upload/" class="dropzone" id="dropzone-chat">
+            {% csrf_token %}
+            <div class="fallback">
+                <input name="file" type="file" multiple />
+            </div>
+          </form>
+        </div>
+
+
+
 
       <div class="row reply">
         <div class="col-sm-1 col-xs-1 reply-emojis">

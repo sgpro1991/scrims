@@ -1,45 +1,104 @@
-var server = require('http').createServer();
-var io = require('socket.io')(server);
+const server = require('http').createServer();
+const io = require('socket.io')(server);
+const request = require('request');
 
 
+const host = '127.0.0.1:9898'
 
 io.on('connection', function(socket){
 
+    socket.join('chat');
+
+    //console.log(socket.id)
+    //console.log(io.sockets.adapter.rooms['chat'].sockets)
+    //console.log(socket.id,'-------------------------------------')
+
     // if user connect to chat
 
-/*      console.log(socket)
-      var cookie = socket.handshake.headers.cookie
-      var regexp = /SCRIMS_TOKEN=.*;/;
-      var str = cookie.match(regexp)
+      //console.log(socket)
+      let cookie = socket.handshake.headers.cookie
+
+      cookie.replace('/csrftoken/',' ')
+      let regexp =  /SCRIMS_TOKEN=................................/;
+      let str = cookie.match(regexp)
       try{
-        io.emit('chat status', {"token":str[0].replace('SCRIMS_TOKEN=','').replace(';',''),"status":"on"});
+        let token = str[0].replace('SCRIMS_TOKEN=','').replace(';','').replace(' ','')
+        request('http://'+host+'/api/status-chat/?token='+token+'&status=on', { json: false }, (err, res, body) => {
+          if (err) { return console.log(err); }
+          //console.log(body)
+          io.emit('chat status', {"token":token,"status":"on","id_user":body});
+        });
+
       }catch(error){
         console.log(error)
       }
-*/
-    // end if user connect to chat
+
+
+
+
 
     socket.on('chat status', function(msg){
-      io.emit('chat status', msg);
+      let cookie = socket.handshake.headers.cookie
+
+      cookie.replace('/csrftoken/',' ')
+      let regexp =  /SCRIMS_TOKEN=................................/;
+      let str = cookie.match(regexp)
+      try{
+        let token = str[0].replace('SCRIMS_TOKEN=','').replace(';','').replace(' ','')
+        request('http://'+host+'/api/status-chat/?token='+token+'&status=on', { json: false }, (err, res, body) => {
+          if (err) { return console.log(err); }
+          //console.log(body)
+          io.emit('chat status', {"token":token,"status":"on","id_user":body});
+        });
+
+      }catch(error){
+        console.log(error)
+      }
     });
+
+
+
+
 
 
     socket.on('chat message', function(msg){
       io.emit('chat message', msg);
     });
 
+
+
+
+
+
+
+
+
+
+
     socket.on('disconnect', function(){
-      console.log(socket,'\n============================')
-      var cookie = socket.handshake.headers.cookie
-      var regexp = /SCRIMS_TOKEN=([A-Z]{32})/;
-      var str = cookie.match(regexp)
-      console.log(str,"===========================111111111111111111111111")
+
+      //console.log(socket.handshake)
+      //var clients = io.sockets.clients('chat');
+      //console.log("ID:",clients)
+
+
+
+      let cookie = socket.handshake.headers.cookie
+      let regexp = /SCRIMS_TOKEN=................................/;
+      let str = cookie.match(regexp)
+
       try{
-        io.emit('chat status', {"token":str[0].replace('SCRIMS_TOKEN=','').replace(';',''),"status":"off"});
-        console.log({"token":str[0].replace('SCRIMS_TOKEN=','').replace(';',''),"status":"off"})
+        let token = str[0].replace('SCRIMS_TOKEN=','').replace(';','').replace(' ','')
+        request('http://'+host+'/api/status-chat/?token='+token+'&status=off', { json: false }, (err, res, body) => {
+          if (err) { return console.log(err); }
+          console.log(body,"off")
+          io.emit('chat status', {"token":token,"status":"off","id_user":body});
+        });
+
       }catch(error){
         console.log(error)
       }
+
 
     });
 });

@@ -73,11 +73,12 @@ def GetHistoryAbout(request):
     limit = request.GET.get('limit',False)
 
     count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
-    if count < (count-int(limit)-10):
-        data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+
+    if count-int(limit)-10 < 0:
+        lim = 0
     else:
-        print(count-int(limit)-10,count-int(limit))
-        data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[count-int(limit)-10:count-int(limit)]
+        lim = count-int(limit)-10
+    data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[lim:count-int(limit)]
 
 
     mass = []

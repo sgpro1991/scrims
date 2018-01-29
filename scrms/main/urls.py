@@ -7,4 +7,5 @@ urlpatterns = [
     path('', Main),
     path('auth/', AuthForm),
     path('authorize/', Auth),
+    path('file-upload/', FileUpload),
 ]

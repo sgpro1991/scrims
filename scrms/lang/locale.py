@@ -10,8 +10,10 @@ RU = [
     "menu":[{
         "profile":"Профиль",
 
+    }],
+    "chat":[{
+        "previous":"Загрузить более ранние сообщения",
     }]
-
     }
 ]
 
@@ -31,6 +33,9 @@ EN = [{
     }],
     "menu":[{
         "profile":"Profile",
+    }],
+    "chat":[{
+        "previous":"Show Previous Message!",
     }]
 
 }]

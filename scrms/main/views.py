@@ -70,6 +70,12 @@ def Auth(request):
 
 
 
+def FileUpload(request):
+    print(request.FILES.get('file'))
+    return HttpResponse("lalalalaal")
+
+
+
 
 
 
