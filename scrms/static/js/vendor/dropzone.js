@@ -38,6 +38,11 @@ function _classCallCheck(instance, Constructor) { if (!(instance instanceof Cons
 // to events.
 // It is strongly based on component's emitter class, and I removed the
 // functionality because of the dependency hell with different frameworks.
+
+
+
+
+
 var Emitter = function () {
   function Emitter() {
     _classCallCheck(this, Emitter);
@@ -48,6 +53,9 @@ var Emitter = function () {
 
     // Add an event listener for given event
     value: function on(event, fn) {
+
+
+
       this._callbacks = this._callbacks || {};
       // Create namespace for this event
       if (!this._callbacks[event]) {
@@ -225,7 +233,7 @@ var Dropzone = function (_Emitter) {
          * the event `maxfilesexceeded` will be called. The dropzone element gets the
          * class `dz-max-files-reached` accordingly so you can provide visual feedback.
          */
-        maxFilesize: 256,
+        maxFilesize: 500,
 
         /**
          * The name of the file param that gets transferred.
@@ -377,7 +385,7 @@ var Dropzone = function (_Emitter) {
          * selector. The element should have the `dropzone-previews` class so
          * the previews are displayed properly.
          */
-        previewsContainer: null,
+        previewsContainer: ".previewsContainer",
 
         /**
          * This is the element the hidden input field (which is used when clicking on the
@@ -543,6 +551,7 @@ var Dropzone = function (_Emitter) {
          * a text.
          */
         fallback: function fallback() {
+
           // This code should pass in IE7... :(
           var messageElement = void 0;
           this.element.className = this.element.className + " dz-browser-not-supported";
@@ -732,9 +741,11 @@ var Dropzone = function (_Emitter) {
         // Called when a file is added to the queue
         // Receives `file`
         addedfile: function addedfile(file) {
+
           var _this2 = this;
 
           if (this.element === this.previewsContainer) {
+
             this.element.classList.add("dz-started");
           }
 
@@ -1192,6 +1203,7 @@ var Dropzone = function (_Emitter) {
       }
 
       if (this.clickableElements.length) {
+
         var setupHiddenFileInput = function setupHiddenFileInput() {
           if (_this3.hiddenFileInput) {
             _this3.hiddenFileInput.parentNode.removeChild(_this3.hiddenFileInput);
@@ -1220,6 +1232,7 @@ var Dropzone = function (_Emitter) {
           _this3.hiddenFileInput.style.width = "0";
           document.querySelector(_this3.options.hiddenInputContainer).appendChild(_this3.hiddenFileInput);
           return _this3.hiddenFileInput.addEventListener("change", function () {
+
             var files = _this3.hiddenFileInput.files;
 
             if (files.length) {
@@ -1793,6 +1806,7 @@ var Dropzone = function (_Emitter) {
         progress: 0,
         // Setting the total upload size to file.size for the beginning
         // It's actual different than the size to be transmitted.
+        class_name:'lol',
         total: file.size,
         bytesSent: 0,
         filename: this._renameFile(file),
@@ -3483,6 +3497,9 @@ var contentLoaded = function contentLoaded(win, fn) {
     return win[add](pre + "load", init, false);
   }
 };
+
+
+
 
 // As a single function to be able to write tests.
 Dropzone._autoDiscoverFunction = function () {

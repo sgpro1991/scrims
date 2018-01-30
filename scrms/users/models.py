@@ -38,3 +38,17 @@ class Message(models.Model):
     type_msg = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False,blank=True)
     date = models.DateTimeField(null=True)
     reading = models.BooleanField(default=False)
+
+
+
+
+
+
+class Storage(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    type_file = models.CharField(max_length=255)
+    name = models.CharField(max_length=255)
+    path = models.CharField(max_length=255)
+    hash_name = models.CharField(max_length=255)
+    url = models.CharField(max_length=255)
+    date = models.DateTimeField(null=True)

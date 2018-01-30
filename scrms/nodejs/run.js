@@ -81,8 +81,6 @@ io.on('connection', function(socket){
       //var clients = io.sockets.clients('chat');
       //console.log("ID:",clients)
 
-
-
       let cookie = socket.handshake.headers.cookie
       let regexp = /SCRIMS_TOKEN=................................/;
       let str = cookie.match(regexp)

@@ -356,11 +356,30 @@ $(document).ready(function(){
 
   Dropzone.autoDiscover = false;
 
-  var myDropzone = new Dropzone("#dropzone-chat");
-  myDropzone.on("success", function(data) {
-    console.log(data)
+
+  //this.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "addedfiles", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
+
+
+  var myDropzone = new Dropzone("#dropzone-chat",);
+  myDropzone.on("complete", function(data) {
+    setTimeout(function(){
+      $('.previewsContainer').fadeOut(300)
+    },3000)
+
+    setTimeout(function(){
+      $('.previewsContainer').empty()
+    },4000)
+
     /* Maybe display some more file information on your page */
   });
+
+  myDropzone.on("addedfile", function(data) {
+    $('.previewsContainer').fadeIn(10)
+    /* Maybe display some more file information on your page */
+  });
+
+
+
 
 
 
@@ -377,6 +396,11 @@ $(document).ready(function(){
   $(window).on("blur focus", function(e) {
     console.log('lala')
     socket.emit('chat status',{"token":getCookie("SCRIMS_TOKEN"),"status":"on"})
+  })
+
+
+  $('.fa-upload').click(function(){
+    $('.dz-hidden-input').click()
   })
 
 
