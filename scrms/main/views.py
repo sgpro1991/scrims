@@ -7,9 +7,7 @@ from django.utils.crypto import get_random_string
 import os
 import json
 from datetime import datetime
-
-
-
+import re
 
 
 class Crypto:
@@ -39,7 +37,7 @@ class Crypto:
 
 
 
-
+cripto = Crypto()
 
 
 
@@ -51,7 +49,7 @@ def Auth(request):
     if email and password:
         if User.objects.filter(email=email).exists():
             a = User.objects.get(email=email)
-            user_pass = Crypto().Decrypt(a.password)
+            user_pass = cripto.Decrypt(a.password)
             if user_pass == password:
                 resp = HttpResponse(status=200)
                 token = get_random_string(length=32)
@@ -59,7 +57,7 @@ def Auth(request):
 
                 with open(BASE_DIR+'/sessions/'+token,'w',encoding='utf-8') as f:
                      json = '[{"id":"'+str(a.id)+'"}]'
-                     f.write(Crypto().Encrypt(json))
+                     f.write(cripto.Encrypt(json))
                 return resp
 
             else:
@@ -86,33 +84,26 @@ def FileUpload(request):
         return HttpResponse(status=403)
 
     file_add = request.FILES.get('file')
+
+    print(request.FILES)
+
+    images_type = ["jpg","JPG","gif","JPEG","png","PNG","tiff","GIF"]
+
+
+
     name = get_random_string(length=32)
 
-
-    filename = MEDIA_ROOT+'storage/'+user[0]["id"]+'/'+name
-    url = MEDIA_URL+'storage/'+user[0]["id"]+'/'+name
-
-    name_file = file_add.name
-    type_file = (os.path.splitext(file_add.name)[1])
-    path_file = filename
-    hash_name = name
-
+    type_file = (os.path.splitext(file_add.name)[1]).replace(".",'')
     usr = User.objects.get(id=user[0]['id'])
 
-    insert = Storage(user=usr,type_file=type_file,name=file_add.name,path=filename,hash_name=name,url=url,date=datetime.now())
+    insert = Storage(user=usr,type_file=type_file,name=file_add.name,hash_name=name,date=datetime.now(),data=cripto.Encrypt(file_add.read()))
     insert.save()
 
-    if not os.path.exists(os.path.dirname(filename)):
-        try:
-            os.makedirs(os.path.dirname(filename))
-        except OSError as exc:
-            if exc.errno != errno.EEXIST:
-                raise
+    url = "/storage/"+str(insert.id)+"/"
+    Storage.objects.filter(id=int(insert.id)).update(url=url)
 
-    with open(filename, 'wb+') as f:
-        f.write(Crypto().Encrypt(file_add.read()))
-    print(url)
-    return HttpResponse(str('{"name":"'+file_add.name+'","url":"'+url+'"}'))
+
+    return HttpResponse(str('{"name":"'+file_add.name+'","types":"'+type_file+'","url":"'+url+'"}'))
 
 
 
@@ -122,21 +113,30 @@ def FileUpload(request):
 
 
 
-def StorageView(request,user,filename):
-    user = CheckAuth(request)
-    if user == False:
-        return HttpResponse(status=404)
 
 
-    file_storage = Storage.objects.get(hash_name=filename)
-    with open(file_storage.path, 'r') as fp:
-        data = (Crypto().Decrypt(bytes(fp.read().encode('utf-8'))))
+def StorageView(request,id,cache):
+    #user = CheckAuth(request)
+    #if user == False:
+        #return HttpResponse(status=404)
 
-    response = HttpResponse(content_type="application/"+file_storage.type_file.replace('.',''))
-    response['Content-Disposition'] = 'attachment; filename=%s' % file_storage.name # force browser to download file
-    response.write(data)
+    file_storage = Storage.objects.get(id=id)
+    data = (cripto.Decrypt(file_storage.data))
 
-    return response
+    f_type = file_storage.type_file.replace('.','')
+    images_type = ["jpg","JPG","gif","JPEG","png","PNG","tiff","GIF"]
+
+
+    if f_type in images_type:
+        if cache == 'cache':
+            return HttpResponse(data, content_type="image/"+file_storage.type_file.replace('.',''))
+        if cache == 'original':
+            return HttpResponse(data,content_type="image/"+file_storage.type_file.replace('.',''))
+    else:
+        response = HttpResponse(content_type="application/"+file_storage.type_file.replace('.',''))
+        response['Content-Disposition'] = 'attachment; filename=%s' % file_storage.name # force browser to download file
+        response.write(data)
+        return response
 
 
 
@@ -154,7 +154,7 @@ def CheckAuth(request):
         check = os.path.exists(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
         if check == True:
             f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'], encoding='utf-8')
-            json_user = json.loads(Crypto().Decrypt(f.read()))
+            json_user = json.loads(cripto.Decrypt(f.read()))
             return (json_user)
         else:
             return False

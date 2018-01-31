@@ -7,6 +7,8 @@ from django.utils.dateparse import parse_datetime
 from django.db.models import Q
 # Create your views here.
 
+cripto = Crypto()
+
 
 def SendMessage(request):
     if CheckAuth(request) == False:
@@ -22,7 +24,13 @@ def SendMessage(request):
         else:
             pass
         if type_msg == "text":
-            body = Crypto().Encrypt(request.POST.get('body',False))
+            body = cripto.Encrypt(request.POST.get('body',False))
+            insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date)
+            insert.save()
+            return HttpResponse(insert.id)
+
+        if type_msg == "file":
+            body = cripto.Encrypt(request.POST.get('body',False))
             insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date)
             insert.save()
             return HttpResponse(insert.id)
@@ -49,7 +57,7 @@ def SetStatus(request):
     check = os.path.exists(BASE_DIR+'/sessions/'+token)
     if check == True:
         f = open(BASE_DIR+'/sessions/'+token, encoding='utf-8')
-        json_user = json.loads(Crypto().Decrypt(f.read()))
+        json_user = json.loads(cripto.Decrypt(f.read()))
         if status == 'on':
             User.objects.filter(id=json_user[0]['id']).update(status=True)
         if status == 'off':
@@ -91,7 +99,7 @@ def GetHistoryAbout(request):
         mass.append({
             'id':a.id,
             'user':a.user.id,
-            'body':Crypto().Decrypt(a.text),
+            'body':cripto.Decrypt(a.text),
             'companion':a.companion,
             'message':message,
             'date':str(a.date)
@@ -126,9 +134,6 @@ def GetHistory(request):
     else:
         data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[(count-10):count]
 
-
-
-
     mass = []
     for a in data:
         if int(a.companion) == int(companion):
@@ -139,7 +144,7 @@ def GetHistory(request):
         mass.append({
             'id':a.id,
             'user':a.user.id,
-            'body':Crypto().Decrypt(a.text),
+            'body':cripto.Decrypt(a.text),
             'companion':a.companion,
             'message':message,
             'date':str(a.date)

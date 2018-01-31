@@ -62,6 +62,49 @@ var csrf_token = "{{csrf_token}}"
 function CHAT(){
 
 
+
+  Dropzone.autoDiscover = false;
+  var myDropzone = new Dropzone("#dropzone-chat",);
+
+  myDropzone.on("success", function(data) {
+    setTimeout(function(){
+      //$('.previewsContainer').fadeOut(300)
+    },3000)
+
+    var a = (data.previewTemplate.children[0].children[0])
+    console.log(data)
+    alert(a)
+
+    let images_type = ["jpg","JPG","gif","JPEG","png","PNG","tiff","GIF"]
+    let jsn = JSON.parse(data.xhr.response)
+    console.log(jsn)
+    if(images_type.indexOf(jsn.types)!= -1){
+      var body = `<a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="max-width:200px" src="${jsn.url}"/></a>`
+
+    }else if(jsn.types == 'pdf' || jsn.types == 'PDF' ){
+      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-pdf.png"/><br></a><span>${jsn.name}</span></div>`
+    }else if(jsn.types == 'doc' || jsn.types == 'DOC' || jsn.types == 'DOC' || jsn.types == 'DOCX' ){
+      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-doc.png"/><br></a><span>${jsn.name}</span></div>`
+    }
+      SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body)
+
+    setTimeout(function(){
+      //$('.previewsContainer').empty()
+
+    },4000)
+
+  });
+
+
+
+  myDropzone.on("addedfile", function(data) {
+    $('.previewsContainer').fadeIn(10)
+  });
+
+
+
+
+
   function SELECT_COMPANION(id){
 
       let user = USERS.filter(data => data.id==id)
@@ -211,8 +254,10 @@ function SEND_MESSAGE(id_user,id_companion,type,message){
   if(msg === ''){return false}
   message = message.replace(/\n/g, "<br>")
 
-  var date = moment().format('YYYY-MM-DD HH:mm:ss')
+  let date = moment().format('YYYY-MM-DD HH:mm:ss')
   let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
+
+  console.log(msg_object)
 
   if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
   SCROLL_TO_BOTTOM()
@@ -253,6 +298,7 @@ function STATUS_CONECTED(data){
 
 function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
+  console.log(data)
   // Парсим сообщение которое пришло нам т.е. reciver
   if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
 
@@ -292,8 +338,8 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
    }
 
-   MESSAGE_NO_SEE(data)
 
+   MESSAGE_NO_SEE(data)
 
 }
 
@@ -354,29 +400,11 @@ socket.on('chat status',data=>STATUS_CONECTED(data))
 
 $(document).ready(function(){
 
-  Dropzone.autoDiscover = false;
 
 
   //this.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "addedfiles", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
 
 
-  var myDropzone = new Dropzone("#dropzone-chat",);
-  myDropzone.on("complete", function(data) {
-    setTimeout(function(){
-      $('.previewsContainer').fadeOut(300)
-    },3000)
-
-    setTimeout(function(){
-      $('.previewsContainer').empty()
-    },4000)
-
-    /* Maybe display some more file information on your page */
-  });
-
-  myDropzone.on("addedfile", function(data) {
-    $('.previewsContainer').fadeIn(10)
-    /* Maybe display some more file information on your page */
-  });
 
 
 

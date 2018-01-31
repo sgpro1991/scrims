@@ -28,9 +28,8 @@ class User(models.Model):
 class Message(models.Model):
     TYPE_CHOICES = (
         ('1', 'text'),
-        ('2', 'img'),
-        ('3', 'file'),
-        ('4', 'link'),
+        ('2', 'file'),
+        ('3', 'link'),
     )
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     companion = models.IntegerField(null=True)
@@ -52,3 +51,4 @@ class Storage(models.Model):
     hash_name = models.CharField(max_length=255)
     url = models.CharField(max_length=255)
     date = models.DateTimeField(null=True)
+    data = models.BinaryField(null=True)
