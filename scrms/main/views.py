@@ -8,6 +8,8 @@ import os
 import json
 from datetime import datetime
 import re
+from PIL import Image
+
 
 
 class Crypto:
@@ -78,19 +80,16 @@ def Auth(request):
 
 
 
+
 def FileUpload(request):
+
     user = CheckAuth(request)
     if user == False:
         return HttpResponse(status=403)
 
     file_add = request.FILES.get('file')
 
-    print(request.FILES)
-
     images_type = ["jpg","JPG","gif","JPEG","png","PNG","tiff","GIF"]
-
-
-
     name = get_random_string(length=32)
 
     type_file = (os.path.splitext(file_add.name)[1]).replace(".",'')
@@ -98,12 +97,21 @@ def FileUpload(request):
 
     insert = Storage(user=usr,type_file=type_file,name=file_add.name,hash_name=name,date=datetime.now(),data=cripto.Encrypt(file_add.read()))
     insert.save()
-
     url = "/storage/"+str(insert.id)+"/"
     Storage.objects.filter(id=int(insert.id)).update(url=url)
 
 
-    return HttpResponse(str('{"name":"'+file_add.name+'","types":"'+type_file+'","url":"'+url+'"}'))
+    name_cache = ''
+    if type_file in images_type:
+        name_cache = get_random_string(length=32)
+        size = 128, 128
+        im = Image.open(file_add)
+        im.thumbnail(size)
+        im.save(BASE_DIR+"/media/storage/"+name+"."+im.format,format=im.format)
+        name_cache = "/media/storage/"+name+"."+im.format
+        Storage.objects.filter(pk=insert.id).update(cache=name)
+
+    return HttpResponse(str('{"name":"'+file_add.name+'","types":"'+type_file+'","url":"'+url+'","cache":"'+name_cache+'"}'))
 
 
 
@@ -115,12 +123,12 @@ def FileUpload(request):
 
 
 
-def StorageView(request,id,cache):
-    #user = CheckAuth(request)
-    #if user == False:
-        #return HttpResponse(status=404)
+def StorageView(request,id):
+    user = CheckAuth(request)
+    if user == False:
+        return HttpResponse(status=404)
 
-    file_storage = Storage.objects.get(id=id)
+    file_storage = Storage.objects.get(pk=id)
     data = (cripto.Decrypt(file_storage.data))
 
     f_type = file_storage.type_file.replace('.','')
@@ -128,12 +136,14 @@ def StorageView(request,id,cache):
 
 
     if f_type in images_type:
-        if cache == 'cache':
-            return HttpResponse(data, content_type="image/"+file_storage.type_file.replace('.',''))
-        if cache == 'original':
-            return HttpResponse(data,content_type="image/"+file_storage.type_file.replace('.',''))
-    else:
+        return HttpResponse(data, content_type="image/"+file_storage.type_file.replace('.',''))
+    elif f_type == 'pdf' or f_type == 'PDF':
         response = HttpResponse(content_type="application/"+file_storage.type_file.replace('.',''))
+        response['Content-Disposition'] = 'attachment; filename=%s' % file_storage.name # force browser to download file
+        response.write(data)
+        return response
+    else:
+        response = HttpResponse(content_type="application/octet-stream")
         response['Content-Disposition'] = 'attachment; filename=%s' % file_storage.name # force browser to download file
         response.write(data)
         return response

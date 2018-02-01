@@ -775,6 +775,16 @@ border-radius: 50%;
      height: 500px;
    }
 
+.heading-typing{
+  display: none;
+  position: absolute;
+    width: 50px;
+    height: 26px;
+    text-align: center;
+    border-radius: 10px 10px 10px 0;
+    bottom: 67px;
+    background: #efebeb;"
+}
    .message-previous {
      margin : 0 !important;
      padding: 0 !important;

@@ -41,8 +41,6 @@ class Message(models.Model):
 
 
 
-
-
 class Storage(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     type_file = models.CharField(max_length=255)
@@ -52,3 +50,4 @@ class Storage(models.Model):
     url = models.CharField(max_length=255)
     date = models.DateTimeField(null=True)
     data = models.BinaryField(null=True)
+    cache = models.CharField(max_length=255,null=True)

@@ -8,5 +8,5 @@ urlpatterns = [
     path('auth/', AuthForm),
     path('authorize/', Auth),
     path('file-upload/', FileUpload),
-    path('storage/<int:id>/<str:cache>/', StorageView),
+    path('storage/<int:id>/', StorageView),
 ]

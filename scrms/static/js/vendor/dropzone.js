@@ -245,7 +245,7 @@ var Dropzone = function (_Emitter) {
         /**
          * Whether thumbnails for images should be generated
          */
-        createImageThumbnails: true,
+        createImageThumbnails: false,
 
         /**
          * In MB. When the filename exceeds this limit, the thumbnail will not be generated.
@@ -1973,6 +1973,7 @@ var Dropzone = function (_Emitter) {
           if (resizeMimeType === 'image/jpeg' || resizeMimeType === 'image/jpg') {
             // Now add the original EXIF information
             resizedDataURL = ExifRestore.restore(file.dataURL, resizedDataURL);
+
           }
           return callback(Dropzone.dataURItoBlob(resizedDataURL));
         }

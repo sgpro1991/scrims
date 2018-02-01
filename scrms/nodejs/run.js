@@ -61,6 +61,11 @@ io.on('connection', function(socket){
       io.emit('chat message', msg);
     });
 
+    socket.on('user typing', function(msg){
+      console.log(msg)
+      io.emit('user typing', msg);
+    });
+
 
     socket.on('disconnect', function(){
 

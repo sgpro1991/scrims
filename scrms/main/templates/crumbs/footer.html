@@ -62,34 +62,47 @@ var csrf_token = "{{csrf_token}}"
 function CHAT(){
 
 
+  //this.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "addedfiles", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
 
   Dropzone.autoDiscover = false;
   var myDropzone = new Dropzone("#dropzone-chat",);
 
   myDropzone.on("success", function(data) {
     setTimeout(function(){
-      //$('.previewsContainer').fadeOut(300)
+      $('.previewsContainer').fadeOut(300)
     },3000)
 
-    var a = (data.previewTemplate.children[0].children[0])
-    console.log(data)
-    alert(a)
 
     let images_type = ["jpg","JPG","gif","JPEG","png","PNG","tiff","GIF"]
     let jsn = JSON.parse(data.xhr.response)
-    console.log(jsn)
+    //console.log(jsn)
+
+
+
     if(images_type.indexOf(jsn.types)!= -1){
-      var body = `<a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="max-width:200px" src="${jsn.url}"/></a>`
+
+      var body = `<a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="max-width:200px" src="${jsn.cache}"/></a>`
 
     }else if(jsn.types == 'pdf' || jsn.types == 'PDF' ){
+
       var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-pdf.png"/><br></a><span>${jsn.name}</span></div>`
+
     }else if(jsn.types == 'doc' || jsn.types == 'DOC' || jsn.types == 'DOC' || jsn.types == 'DOCX' ){
+
       var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-doc.png"/><br></a><span>${jsn.name}</span></div>`
+
+    }else if(jsn.types == 'xls' || jsn.types == 'XLS' || jsn.types == 'csv' || jsn.types == 'CSV' ){
+
+      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-xls.png"/><br></a><span>${jsn.name}</span></div>`
+
+    }else{
+      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file.png"/><br></a><span>${jsn.name}</span></div>`
+
     }
       SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body)
 
     setTimeout(function(){
-      //$('.previewsContainer').empty()
+      $('.previewsContainer').empty()
 
     },4000)
 
@@ -117,9 +130,12 @@ function CHAT(){
             </div>
             </div>
           <div class="col-sm-8 col-xs-7 heading-name">
-            <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}</a>
+            <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
+           </a>
             <span class="heading-online">Online</span>
-          </div>`)
+          </div>
+
+          `)
 
           GET_HISTORY(id)
 
@@ -150,7 +166,10 @@ function CHAT(){
                   $('#scrims_chat_canvas').empty()
                   PARSER_MSG_HISTORY(id,result)
                   $('#scrims_chat_textarea').val('')
-                  $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
+                  setTimeout(function(){
+                          $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
+                  },10)
+
 
               })
   }
@@ -167,6 +186,7 @@ function CHAT(){
 
 
     $.each(result.reverse(),function(k,v){
+
         if(v.message=='recive'){
           var cls_mess = 'receiver'
         }else {
@@ -253,6 +273,8 @@ function SEND_MESSAGE(id_user,id_companion,type,message){
   let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
   if(msg === ''){return false}
   message = message.replace(/\n/g, "<br>")
+  //smiles
+  //message = message.replace(/=)/g, "<br>")
 
   let date = moment().format('YYYY-MM-DD HH:mm:ss')
   let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
@@ -298,7 +320,6 @@ function STATUS_CONECTED(data){
 
 function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
-  console.log(data)
   // Парсим сообщение которое пришло нам т.е. reciver
   if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
 
@@ -314,7 +335,7 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
                 </div>
               </div>
             </div>`)
-
+          $('.heading-typing').css({'display':''})
           SCROLL_TO_BOTTOM()
 
 
@@ -334,7 +355,7 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
             </div>
           </div>`)
 
-          SCROLL_TO_BOTTOM() //bltv r ybpe
+          SCROLL_TO_BOTTOM()
 
    }
 
@@ -394,21 +415,54 @@ socket.on('chat status',data=>STATUS_CONECTED(data))
 //end actions
 
 
+/* позволяет делать тайминги при вызове ф-ций */
+function debounce(func, wait, immediate) {
+	var timeout;
+	return function() {
+		var context = this, args = arguments;
+		var later = function() {
+			timeout = null;
+			if (!immediate) func.apply(context, args);
+		};
+		var callNow = immediate && !timeout;
+		clearTimeout(timeout);
+		timeout = setTimeout(later, wait);
+		if (callNow) func.apply(context, args);
+	};
+};
+
+
+  function TYPYNG_MSG(){
+    socket.emit('user typing',{"user":USER_ID,"companion":parseInt($('#scrims_chat_init').attr('data-init'))})
+  }
+
+  function TYPYNG_USR(data){
+
+
+    if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
+
+      $('.heading-typing').css({'display':'block'})
+      clearTimeout(timerId);
+      var timerId = setTimeout(function(){
+            $('.heading-typing').css({'display':''})
+        },8000)
+      }
+
+
+  }
+
+  socket.on('user typing',data=>TYPYNG_USR(data))
+
+
+  $('#scrims_chat_textarea').on('input change', debounce(TYPYNG_MSG, 220));
+
+
+
 }//end chat
 
 
 
 $(document).ready(function(){
-
-
-
-  //this.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "addedfiles", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
-
-
-
-
-
-
 
 
   function getCookie(name) {
