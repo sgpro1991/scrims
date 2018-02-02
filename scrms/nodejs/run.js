@@ -10,8 +10,6 @@ const host = '127.0.0.1:9898'
 io.on('connection', function(socket){
 
     socket.join('chat');
-
-    // if user connect to chat
       let cookie = socket.handshake.headers.cookie
 
       cookie.replace('/csrftoken/',' ')
@@ -21,7 +19,6 @@ io.on('connection', function(socket){
         let token = str[0].replace('SCRIMS_TOKEN=','').replace(';','').replace(' ','')
         request('http://'+host+'/api/status-chat/?token='+token+'&status=on', { json: false }, (err, res, body) => {
           if (err) { return console.log(err); }
-          //console.log(body)
           io.emit('chat status', {"token":token,"status":"on","id_user":body});
         });
 
@@ -57,12 +54,24 @@ io.on('connection', function(socket){
 
 
     socket.on('chat message', function(msg){
-      console.log(msg)
       io.emit('chat message', msg);
     });
 
-    socket.on('user typing', function(msg){
+
+
+    socket.on('msg delivered', function(msg){
+      //console.log(msg)
+      io.emit('msg delivered', msg);
+    });
+
+
+    socket.on('msg readed', function(msg){
       console.log(msg)
+      io.emit('msg readed', msg);
+    });
+
+
+    socket.on('user typing', function(msg){
       io.emit('user typing', msg);
     });
 
@@ -77,7 +86,7 @@ io.on('connection', function(socket){
         let token = str[0].replace('SCRIMS_TOKEN=','').replace(';','').replace(' ','')
         request('http://'+host+'/api/status-chat/?token='+token+'&status=off', { json: false }, (err, res, body) => {
           if (err) { return console.log(err); }
-          console.log(body,"off")
+          //console.log(body,"off")
           io.emit('chat status', {"token":token,"status":"off","id_user":body});
         });
 

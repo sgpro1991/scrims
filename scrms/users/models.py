@@ -36,7 +36,9 @@ class Message(models.Model):
     text = models.TextField()
     type_msg = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False,blank=True)
     date = models.DateTimeField(null=True)
+    delivered = models.BooleanField(default=False)
     reading = models.BooleanField(default=False)
+
 
 
 

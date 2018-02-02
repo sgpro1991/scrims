@@ -6,8 +6,12 @@ from datetime import datetime
 from django.utils.dateparse import parse_datetime
 from django.db.models import Q
 # Create your views here.
+from django.utils.html import strip_tags
+from bs4 import BeautifulSoup
 
-cripto = Crypto()
+import html
+
+crypto = Crypto()
 
 
 def SendMessage(request):
@@ -24,16 +28,18 @@ def SendMessage(request):
         else:
             pass
         if type_msg == "text":
-            body = cripto.Encrypt(request.POST.get('body',False))
-            insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date)
+            escape_string = html.escape(request.POST.get('body',False)).replace("&lt;br&gt;","<br>")
+            body = crypto.Encrypt(escape_string)
+            insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
             insert.save()
-            return HttpResponse(insert.id)
+            return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+escape_string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
 
         if type_msg == "file":
-            body = cripto.Encrypt(request.POST.get('body',False))
-            insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date)
+            string = request.POST.get('body',False)
+            body = crypto.Encrypt(string)
+            insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
             insert.save()
-            return HttpResponse(insert.id)
+            return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
     else:
         return HttpResponse(status=404)
 
@@ -57,7 +63,7 @@ def SetStatus(request):
     check = os.path.exists(BASE_DIR+'/sessions/'+token)
     if check == True:
         f = open(BASE_DIR+'/sessions/'+token, encoding='utf-8')
-        json_user = json.loads(cripto.Decrypt(f.read()))
+        json_user = json.loads(crypto.Decrypt(f.read()))
         if status == 'on':
             User.objects.filter(id=json_user[0]['id']).update(status=True)
         if status == 'off':
@@ -99,10 +105,12 @@ def GetHistoryAbout(request):
         mass.append({
             'id':a.id,
             'user':a.user.id,
-            'body':cripto.Decrypt(a.text),
+            'body':crypto.Decrypt(a.text),
             'companion':a.companion,
             'message':message,
-            'date':str(a.date)
+            'date':str(a.date),
+            'delivered':a.delivered,
+            'reading':a.reading
         })
 
     return HttpResponse(json.dumps(mass))
@@ -126,13 +134,25 @@ def GetHistory(request):
     if companion == False:
         return HttpResponse(status=404)
 
-
     count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
+    not_read = Message.objects.filter(companion=user,reading=False)
+    for a in not_read:
+        print(a.user.name)
+        print(a.companion,"================>")
 
-    if count < 10:
+
+    if len(not_read)>0:
         data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+        mass = []
+        for a in not_read:
+            mass.append(a.id)
+        Message.objects.filter(pk__in=mass).update(reading=True)
+
     else:
-        data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[(count-10):count]
+        if count < 10:
+            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+        else:
+            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[(count-10):count]
 
     mass = []
     for a in data:
@@ -140,14 +160,16 @@ def GetHistory(request):
             message = 'main'
         else:
             message = 'recive'
-
+        print(a.reading)
         mass.append({
             'id':a.id,
             'user':a.user.id,
-            'body':cripto.Decrypt(a.text),
+            'body':crypto.Decrypt(a.text),
             'companion':a.companion,
             'message':message,
-            'date':str(a.date)
+            'date':str(a.date),
+            'delivered':a.delivered,
+            'reading':a.reading
         })
 
     return HttpResponse(json.dumps(mass))

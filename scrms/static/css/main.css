@@ -192,6 +192,8 @@
 display: none;
 }
 
+
+
 .dropzone {
 /*  min-height: 150px;
   border: 2px solid rgba(0, 0, 0, 0.3);
@@ -209,7 +211,11 @@ padding: 20px 20px; */}
     display: none;
    }
   .dropzone.dz-drag-hover {
-    border-style: solid; }
+    /*border-style: solid; */
+    box-shadow: 0px 5px 119px 48px #848484;
+
+
+  }
     .dropzone.dz-drag-hover .dz-message {
 
       opacity: 0.5; }
@@ -764,6 +770,11 @@ border-radius: 50%;
      /*overflow-y: auto;*/
    }
 
+#scrims_chat_canvas{
+  background: url("/static/img/pattern.svg") repeat;
+  background-color: #a2a2a2;
+}
+
    .message {
      padding: 130px 0 !important;
      margin: 0 !important;
@@ -831,10 +842,11 @@ border-radius: 50%;
    }
 
    .message-time {
-     margin: 0 !important;
-     margin-left: 50px !important;
+     /* margin: 0 !important; */
+     margin-right: 15px !important;
+     margin-left: 50px;
      font-size: 12px;
-     text-align: right;
+     /* text-align: right; */
      color: #9a9a9a;
 
    }
@@ -854,6 +866,7 @@ border-radius: 50%;
 }
 
    .sender {
+     position: relative;
      float: right;
      width: auto !important;
      background: #dcf8c6;
@@ -864,7 +877,20 @@ border-radius: 50%;
      word-wrap: break-word;
    }
 
+.reading_msg, .delivered_msg{
+  font-size: 8px;
+    position: absolute;
+}
 
+.delivered_msg{
+  bottom: 15px;
+  right: 10px;
+}
+
+.reading_msg{
+  bottom: 10px;
+  right: 10px;
+}
    /*Reply*/
 
    .reply {

@@ -39,7 +39,7 @@ class Crypto:
 
 
 
-cripto = Crypto()
+crypto = Crypto()
 
 
 
@@ -51,7 +51,7 @@ def Auth(request):
     if email and password:
         if User.objects.filter(email=email).exists():
             a = User.objects.get(email=email)
-            user_pass = cripto.Decrypt(a.password)
+            user_pass = crypto.Decrypt(a.password)
             if user_pass == password:
                 resp = HttpResponse(status=200)
                 token = get_random_string(length=32)
@@ -59,7 +59,7 @@ def Auth(request):
 
                 with open(BASE_DIR+'/sessions/'+token,'w',encoding='utf-8') as f:
                      json = '[{"id":"'+str(a.id)+'"}]'
-                     f.write(cripto.Encrypt(json))
+                     f.write(crypto.Encrypt(json))
                 return resp
 
             else:
@@ -95,7 +95,7 @@ def FileUpload(request):
     type_file = (os.path.splitext(file_add.name)[1]).replace(".",'')
     usr = User.objects.get(id=user[0]['id'])
 
-    insert = Storage(user=usr,type_file=type_file,name=file_add.name,hash_name=name,date=datetime.now(),data=cripto.Encrypt(file_add.read()))
+    insert = Storage(user=usr,type_file=type_file,name=file_add.name,hash_name=name,date=datetime.now(),data=crypto.Encrypt(file_add.read()))
     insert.save()
     url = "/storage/"+str(insert.id)+"/"
     Storage.objects.filter(id=int(insert.id)).update(url=url)
@@ -129,7 +129,7 @@ def StorageView(request,id):
         return HttpResponse(status=404)
 
     file_storage = Storage.objects.get(pk=id)
-    data = (cripto.Decrypt(file_storage.data))
+    data = (crypto.Decrypt(file_storage.data))
 
     f_type = file_storage.type_file.replace('.','')
     images_type = ["jpg","JPG","gif","JPEG","png","PNG","tiff","GIF"]
@@ -164,7 +164,7 @@ def CheckAuth(request):
         check = os.path.exists(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'])
         if check == True:
             f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'], encoding='utf-8')
-            json_user = json.loads(cripto.Decrypt(f.read()))
+            json_user = json.loads(crypto.Decrypt(f.read()))
             return (json_user)
         else:
             return False

@@ -81,22 +81,22 @@ function CHAT(){
 
     if(images_type.indexOf(jsn.types)!= -1){
 
-      var body = `<a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="max-width:200px" src="${jsn.cache}"/></a>`
+      var body = `<a href=''${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='max-width:200px' src='${jsn.cache}'/></a>`
 
     }else if(jsn.types == 'pdf' || jsn.types == 'PDF' ){
 
-      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-pdf.png"/><br></a><span>${jsn.name}</span></div>`
+      var body = `<div style='text-align:center'><a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='width:80px' src='/static/img/file-pdf.png'/><br></a><span>${jsn.name}</span></div>`
 
     }else if(jsn.types == 'doc' || jsn.types == 'DOC' || jsn.types == 'DOC' || jsn.types == 'DOCX' ){
 
-      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-doc.png"/><br></a><span>${jsn.name}</span></div>`
+      var body = `<div style='text-align:center'><a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='width:80px' src='/static/img/file-doc.png'/><br></a><span>${jsn.name}</span></div>`
 
     }else if(jsn.types == 'xls' || jsn.types == 'XLS' || jsn.types == 'csv' || jsn.types == 'CSV' ){
 
-      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file-xls.png"/><br></a><span>${jsn.name}</span></div>`
+      var body = `<div style='text-align:center'><a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='width:80px' src='/static/img/file-xls.png'/><br></a><span>${jsn.name}</span></div>`
 
     }else{
-      var body = `<div style="text-align:center"><a href="${jsn.url}" target="blank"><img class="scrims_chat_message_file img_types" style="width:80px" src="/static/img/file.png"/><br></a><span>${jsn.name}</span></div>`
+      var body = `<div style='text-align:center'><a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='width:80px' src='/static/img/file.png'/><br></a><span>${jsn.name}</span></div>`
 
     }
       SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body)
@@ -184,8 +184,11 @@ function CHAT(){
 
   function PARSER_MSG_HISTORY(id,result){
 
+            var messages_read = []
 
     $.each(result.reverse(),function(k,v){
+
+      messages_read.push(v.id)
 
         if(v.message=='recive'){
           var cls_mess = 'receiver'
@@ -195,7 +198,28 @@ function CHAT(){
 
         let date = moment(v.date).calendar()
 
-        $('#scrims_chat_canvas').prepend(`<div class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}" style="display:none">
+        if(v.delivered==true && cls_mess=='sender'){
+            var check = '<span class="fa fa-check delivered_msg" style="color: rgb(79, 206, 59);"></span>'
+        }else if(v.delivered==false && cls_mess=='sender'){
+            var check = '<span class="fa fa-check delivered_msg"></span>'
+        }else{
+          var check = ''
+        }
+
+
+        console.log(v.reading)
+        if(v.reading==true && cls_mess=='sender'){
+
+            var read = '<span class="fa fa-check reading_msg" style="color: rgb(79, 206, 59);"></span>'
+        }else if(v.reading==false && cls_mess=='sender'){
+            var read = '<span class="fa fa-check reading_msg"></span>'
+        }else{
+          var read = ''
+        }
+
+        console.log(read)
+
+        $('#scrims_chat_canvas').prepend(`<div id="id_msg_${v.id}" class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}" style="display:none">
             <div class="col-sm-12 message-main-${cls_mess}">
               <div class="${cls_mess}">
                 <div class="message-text">
@@ -203,11 +227,15 @@ function CHAT(){
                 </div>
                 <span class="message-time pull-right">
                   ${moment(v.date).calendar()}
+                  ${check}
+                  ${read}
                 </span>
               </div>
             </div>
           </div>`)
     })
+
+    //socket.emit("msg readed",{"id_msg":messages_read}) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     $('.message-body').fadeIn('slow')
 
@@ -241,14 +269,14 @@ function CHAT(){
   function SEND_AJAX_MESSAGE(msg_object){
 
     if(isNaN(msg_object.companion) == true){return false}//if not found recipient
-
     let data = $.ajax({
       url:'/api/send-message/',
       type:'POST',
+      dataType:"json",
       data:msg_object,
       success:function(data){
-          msg_object.id_msg = data
-          socket.emit('chat message',msg_object);
+          socket.emit('chat message',data);
+          socket.emit("msg delivered",{"id_msg":data.id_msg})
       },statusCode:{
         403:error => window.location.reload(),
         400:function(){
@@ -256,10 +284,11 @@ function CHAT(){
         }
       }
     })
-
     return data
-    console.log(data,'111')
+
   }
+
+
 
 
 
@@ -278,8 +307,6 @@ function SEND_MESSAGE(id_user,id_companion,type,message){
 
   let date = moment().format('YYYY-MM-DD HH:mm:ss')
   let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
-
-  console.log(msg_object)
 
   if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
   SCROLL_TO_BOTTOM()
@@ -323,7 +350,7 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
   // Парсим сообщение которое пришло нам т.е. reciver
   if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
 
-    $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_receiver" data-init="${data.id_msg}">
+    $('#scrims_chat_canvas').append(`<div id="id_msg_${data.id_msg}" class="row message-body scrims_chat_msg_receiver" data-init="${data.id_msg}">
               <div class="col-sm-12 message-main-receiver">
                 <div class="receiver">
                   <div class="message-text">
@@ -335,14 +362,14 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
                 </div>
               </div>
             </div>`)
-          $('.heading-typing').css({'display':''})
+          $('.heading-typing').fadeOut(200)
           SCROLL_TO_BOTTOM()
-
+          socket.emit("msg readed",{"id_msg":data.id_msg})
 
   }  // Парсим сообщение которое мы отправили
   else if(data.user === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.companion){
 
-        $('#scrims_chat_canvas').append(`<div class="row message-body scrims_chat_msg_main" data-init="${data.id_msg}">
+        $('#scrims_chat_canvas').append(`<div id="id_msg_${data.id_msg}" class="row message-body scrims_chat_msg_main" data-init="${data.id_msg}">
             <div class="col-sm-12 message-main-sender">
               <div class="sender">
                 <div class="message-text">
@@ -350,12 +377,13 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
                 </div>
                 <span class="message-time pull-right">
                   ${moment().calendar()}
+                  <span class="fa fa-check delivered_msg"></span>
+                  <span class="fa fa-check reading_msg"></span>
                 </span>
               </div>
             </div>
           </div>`)
-
-          SCROLL_TO_BOTTOM()
+        SCROLL_TO_BOTTOM()
 
    }
 
@@ -376,13 +404,40 @@ function MESSAGE_NO_SEE(data){
         })
     }
 
+}
+
+
+function MSG_DELIVERED(data){
+  console.log(data)
+  $('#id_msg_'+data.id_msg).find('.delivered_msg').css({'color':'#4fce3b'})
+}
+
+
+
+
+
+
+function MSG_READED(data){
+
+  if(Array.isArray(data.id_msg) == true){
+
+    $.each(data.id_msg,function(k,v){
+      $('#id_msg_'+v).find('.reading_msg').css({'color':'#4fce3b'})
+    })
+
+  }else{
+      $('#id_msg_'+data.id_msg).find('.reading_msg').css({'color':'#4fce3b'})
+  }
 
 
 }
 
+
+
 socket.on('chat message',data=>PARSER_RECIVE_AND_SENDER_MESSAGE(data))
 socket.on('chat status',data=>STATUS_CONECTED(data))
-
+socket.on('msg delivered',data=>MSG_DELIVERED(data))
+socket.on('msg readed',data=>MSG_READED(data))
 
 
 
@@ -408,8 +463,10 @@ socket.on('chat status',data=>STATUS_CONECTED(data))
 
   $('.scrims_chat_companion').off('click')
   $('.scrims_chat_companion').on('click',function(){
+    if($(this).hasClass('cleanstate_chat_companion') == true){return false}
     $('.scrims_chat_companion').removeClass('cleanstate_chat_companion')
     $(this).addClass('cleanstate_chat_companion');
+
     SELECT_COMPANION($(this).attr('data-init'))
   })
 //end actions
@@ -441,10 +498,10 @@ function debounce(func, wait, immediate) {
 
     if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
 
-      $('.heading-typing').css({'display':'block'})
+      $('.heading-typing').fadeIn(200)
       clearTimeout(timerId);
       var timerId = setTimeout(function(){
-            $('.heading-typing').css({'display':''})
+            $('.heading-typing').fadeOut(200)
         },8000)
       }
 
