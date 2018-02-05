@@ -14,12 +14,15 @@
           </div>
         </div>
       </div>
+      <!-- MD5 -->
+      <script src="/static/js/vendor/md5.js"></script>
+      <!-- MD5 -->
       <script>
 
         function Request(email,pass){
           if (email != '' && pass != '' ){
             var xhr = new XMLHttpRequest();
-            var body = 'email=' + encodeURIComponent(email) +'&password=' + encodeURIComponent(pass)+'&csrfmiddlewaretoken='+encodeURIComponent('{{csrf_token}}');
+            var body = 'email=' + encodeURIComponent(email) +'&password=' + encodeURIComponent(md5(pass))+'&csrfmiddlewaretoken='+encodeURIComponent('{{csrf_token}}');
             xhr.open("POST", '/authorize/', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.onreadystatechange = function() {

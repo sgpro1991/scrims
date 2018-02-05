@@ -3,7 +3,9 @@
 <script src="/static/js/vendor/modernizr-3.5.0.min.js"></script>
 
 
-
+<!-- MD5 -->
+<script src="/static/js/vendor/md5.js"></script>
+<!-- MD5 -->
 
 
 
@@ -48,6 +50,37 @@
 <!-- SCRIMS CHAT -->
 <script type="text/babel">
 
+let p = 12
+let g = 5
+
+
+
+let a = 0
+let A = Math.pow(g,a)%p
+//alert(A)
+
+
+
+
+let b = 19
+let B = Math.pow(g,b)%p
+//alert(B)
+
+
+
+
+
+var s1 = Math.pow(B,a)%p
+var s2 = Math.pow(A,b)%p
+
+
+//alert(s1)
+//alert(s2)
+ console.log(md5(323232))
+
+
+
+const LANG = 0 //{{lang}}
 const USER_ID = {{user.id}}
 const USERS = [{% for item in users  %}{"id":"{{item.id}}","name":"{{item.name}}","img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}"},{% endfor %}]
 
@@ -59,9 +92,42 @@ var csrf_token = "{{csrf_token}}"
 //config
 
 
+function notifyMe() {
+  // Проверка поддерживаемости браузером уведомлений
+  if (!("Notification" in window)) {
+    alert("This browser does not support desktop notification");
+  }
+
+  // Проверка разрешения на отправку уведомлений
+  else if (Notification.permission === "granted") {
+    // Если разрешено то создаем уведомлений
+    var notification = new Notification("Hi there!");
+  }
+
+  // В противном случает мы запрашиваем разрешение
+  else if (Notification.permission !== 'denied') {
+    Notification.requestPermission(function (permission) {
+      // Если пользователь разрешил, то создаем уведомление
+      if (permission === "granted") {
+        var notification = new Notification("Hi there!");
+      }
+    });
+  }
+
+  // В конечном счете если пользователь отказался от получения
+  // уведомлений, то стоит уважать его выбор и не беспокоить его
+  // по этому поводу .
+}
+
+
+
+
 function CHAT(){
 
+  Notification.requestPermission(function(permission){
 
+  console.log('Результат запроса прав:', permission);
+  });
   //this.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "addedfiles", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
 
   Dropzone.autoDiscover = false;
@@ -81,7 +147,7 @@ function CHAT(){
 
     if(images_type.indexOf(jsn.types)!= -1){
 
-      var body = `<a href=''${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='max-width:200px' src='${jsn.cache}'/></a>`
+      var body = `<a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='max-width:200px' src='${jsn.cache}'/></a>`
 
     }else if(jsn.types == 'pdf' || jsn.types == 'PDF' ){
 
@@ -188,9 +254,9 @@ function CHAT(){
 
     $.each(result.reverse(),function(k,v){
 
-      messages_read.push(v.id)
 
         if(v.message=='recive'){
+          messages_read.push(v.id) // статус прочитанных сообщений
           var cls_mess = 'receiver'
         }else {
           var cls_mess = 'sender'
@@ -209,7 +275,7 @@ function CHAT(){
 
         console.log(v.reading)
         if(v.reading==true && cls_mess=='sender'){
-
+            messages_read.push(v.id)
             var read = '<span class="fa fa-check reading_msg" style="color: rgb(79, 206, 59);"></span>'
         }else if(v.reading==false && cls_mess=='sender'){
             var read = '<span class="fa fa-check reading_msg"></span>'
@@ -235,7 +301,9 @@ function CHAT(){
           </div>`)
     })
 
-    //socket.emit("msg readed",{"id_msg":messages_read}) !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+
+    socket.emit("msg readed",{"id_msg":messages_read}) //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
     $('.message-body').fadeIn('slow')
 
@@ -345,6 +413,15 @@ function STATUS_CONECTED(data){
 }
 
 
+function READED_MSG(id_msg){
+
+  MAIN_AJAX_GET('/api/read-msg/'+id_msg+'/').then(function(result){
+    console.log(result)
+  })
+
+}
+
+
 function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
   // Парсим сообщение которое пришло нам т.е. reciver
@@ -365,6 +442,8 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
           $('.heading-typing').fadeOut(200)
           SCROLL_TO_BOTTOM()
           socket.emit("msg readed",{"id_msg":data.id_msg})
+          READED_MSG(data.id_msg)
+
 
   }  // Парсим сообщение которое мы отправили
   else if(data.user === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.companion){

@@ -7,5 +7,6 @@ urlpatterns = [
     path('send-message/', SendMessage),
     path('get-history/', GetHistory),
     path('status-chat/', SetStatus),
+    path('read-msg/<int:id_msg>/', ReadMsg),
     path('get-history-about/', GetHistoryAbout),
 ]

@@ -9,6 +9,7 @@ import json
 from datetime import datetime
 import re
 from PIL import Image
+import hashlib
 
 
 
@@ -48,11 +49,13 @@ crypto = Crypto()
 def Auth(request):
     email = request.POST.get('email',False)
     password = request.POST.get('password',False)
+    print(password)
     if email and password:
         if User.objects.filter(email=email).exists():
             a = User.objects.get(email=email)
             user_pass = crypto.Decrypt(a.password)
-            if user_pass == password:
+
+            if a.hash_password == password:
                 resp = HttpResponse(status=200)
                 token = get_random_string(length=32)
                 resp.set_cookie('SCRIMS_TOKEN',token)

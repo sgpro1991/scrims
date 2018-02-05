@@ -48,6 +48,16 @@ def SendMessage(request):
 
 
 
+def ReadMsg(request,id_msg):
+    if CheckAuth(request) == False:
+        return HttpResponse(status=403)
+
+    if id_msg:
+        Message.objects.filter(pk=id_msg).update(reading=True)
+        return HttpResponse('{"status":"200"}')
+    else:
+        return HttpResponse(status=404)
+
 
 
 
