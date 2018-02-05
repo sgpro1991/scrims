@@ -13,7 +13,7 @@ class UserAdmin(admin.ModelAdmin):
 
         obj.user = request.user
         if obj.id is None:
-            password = get_random_string(length=6)
+            password = get_random_string(length=11)
             crypt = Crypto().Encrypt(password)
             hash_md5 = hashlib.md5(password.encode('utf-8'))
             print(hash_md5.hexdigest())

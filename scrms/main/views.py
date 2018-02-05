@@ -84,6 +84,10 @@ def Auth(request):
 
 
 
+
+
+
+
 def FileUpload(request):
 
     user = CheckAuth(request)
@@ -207,6 +211,23 @@ def AuthForm(request):
 
 
 
+def gcd(a,b):
+    while a != b:
+        if a > b:
+            a = a - b
+        else:
+            b = b - a
+    return a
+
+
+def primitive_root(modulo):
+    required_set = set(num for num in range (1, modulo) if gcd(num, modulo) == 1)
+    for g in range(1, modulo):
+        actual_set = set(pow(g, powers) % modulo for powers in range (1, modulo))
+        if required_set == actual_set:
+            print (g,'==============>')
+
+
 
 
 
@@ -220,6 +241,7 @@ def Main(request):
     if user == False:
         return redirect('/auth/')
 
+    print(primitive_root(41))
     print(user[0]['id'])
     user_data = User.objects.get(pk=user[0]['id'])
     users = User.objects.all().exclude(pk=user[0]['id'])

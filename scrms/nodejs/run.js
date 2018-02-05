@@ -66,7 +66,6 @@ io.on('connection', function(socket){
 
 
     socket.on('msg readed', function(msg){
-      console.log(msg)
       io.emit('msg readed', msg);
     });
 

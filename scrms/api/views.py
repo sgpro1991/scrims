@@ -182,4 +182,6 @@ def GetHistory(request):
             'reading':a.reading
         })
 
+
+
     return HttpResponse(json.dumps(mass))

@@ -50,19 +50,19 @@
 <!-- SCRIMS CHAT -->
 <script type="text/babel">
 
-let p = 12
-let g = 5
+let p = 41
+let g = 6
 
 
 
-let a = 0
+let a = 11
 let A = Math.pow(g,a)%p
 //alert(A)
 
 
 
 
-let b = 19
+let b = 17
 let B = Math.pow(g,b)%p
 //alert(B)
 
@@ -74,9 +74,10 @@ var s1 = Math.pow(B,a)%p
 var s2 = Math.pow(A,b)%p
 
 
-//alert(s1)
-//alert(s2)
- console.log(md5(323232))
+console.log(s1)
+console.log(s2)
+console.log(md5(s1))
+console.log(md5(s2))
 
 
 
@@ -126,7 +127,7 @@ function CHAT(){
 
   Notification.requestPermission(function(permission){
 
-  console.log('Результат запроса прав:', permission);
+  //console.log('Результат запроса прав:', permission);
   });
   //this.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "addedfiles", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
 
@@ -273,7 +274,7 @@ function CHAT(){
         }
 
 
-        console.log(v.reading)
+        //console.log(v.reading)
         if(v.reading==true && cls_mess=='sender'){
             messages_read.push(v.id)
             var read = '<span class="fa fa-check reading_msg" style="color: rgb(79, 206, 59);"></span>'
@@ -283,7 +284,7 @@ function CHAT(){
           var read = ''
         }
 
-        console.log(read)
+        //console.log(read)
 
         $('#scrims_chat_canvas').prepend(`<div id="id_msg_${v.id}" class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}" style="display:none">
             <div class="col-sm-12 message-main-${cls_mess}">
@@ -391,7 +392,7 @@ function SCROLL_TO_BOTTOM(){
 
 function STATUS_CONECTED(data){
     var token = data.token.replace(' ','')
-    console.log(data.id_user,data.status)
+    //console.log(data.id_user,data.status)
 
       if(data.status == 'on'){
         $('.scrims_chat_companion').each(function(){
@@ -612,7 +613,6 @@ $(document).ready(function(){
   CHAT()
 
   $(window).on("blur focus", function(e) {
-    console.log('lala')
     socket.emit('chat status',{"token":getCookie("SCRIMS_TOKEN"),"status":"on"})
   })
 
