@@ -9,4 +9,5 @@ urlpatterns = [
     path('authorize/', Auth),
     path('file-upload/', FileUpload),
     path('storage/<int:id>/', StorageView),
+    path('test/', Test),
 ]

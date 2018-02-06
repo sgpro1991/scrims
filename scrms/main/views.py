@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from scrms.settings import BASE_DIR,LANG,MEDIA_ROOT,MEDIA_URL
-from users.models import User,Storage
+from users.models import User,Storage,Message
 from django.utils.crypto import get_random_string
 import os
 import json
@@ -160,7 +160,16 @@ def StorageView(request,id):
 
 
 
-
+from Crypto.Cipher import AES
+def Test(request):
+    obj = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
+    message = '<h1></h1>1234567'
+    ciphertext = obj.encrypt(message)
+    obj2 = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
+    decrypt = obj2.decrypt(ciphertext)
+    print(ciphertext,decrypt)
+    a = render(request,'test.html',{"html":ciphertext})
+    return HttpResponse(a)
 
 
 
@@ -211,22 +220,6 @@ def AuthForm(request):
 
 
 
-def gcd(a,b):
-    while a != b:
-        if a > b:
-            a = a - b
-        else:
-            b = b - a
-    return a
-
-
-def primitive_root(modulo):
-    required_set = set(num for num in range (1, modulo) if gcd(num, modulo) == 1)
-    for g in range(1, modulo):
-        actual_set = set(pow(g, powers) % modulo for powers in range (1, modulo))
-        if required_set == actual_set:
-            print (g,'==============>')
-
 
 
 
@@ -241,8 +234,21 @@ def Main(request):
     if user == False:
         return redirect('/auth/')
 
-    print(primitive_root(41))
-    print(user[0]['id'])
     user_data = User.objects.get(pk=user[0]['id'])
+
+
     users = User.objects.all().exclude(pk=user[0]['id'])
-    return render(request,"home.html",{'user':user_data,'users':users,'lang':LANG})
+
+    user_mass = []
+    for a in users:
+        count = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False).count()
+        user_mass.append({
+            "id":a.id,
+            "name":a.name,
+            "count_msg":count,
+            "image":a.image,
+            "public_key_user":a.public_key_user,
+        })
+
+    print(user_mass)
+    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':LANG})

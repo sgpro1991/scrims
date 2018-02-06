@@ -14,15 +14,16 @@
           </div>
         </div>
       </div>
-      <!-- MD5 -->
-      <script src="/static/js/vendor/md5.js"></script>
-      <!-- MD5 -->
+      <script src="/static/js/vendor/crypto-js/crypto-js.min.js"></script>
+      <script src="/static/js/vendor/crypto-js/sha256.min.js"></script>
       <script>
+
 
         function Request(email,pass){
           if (email != '' && pass != '' ){
+            var encrypted_pass = CryptoJS.SHA256(pass);
             var xhr = new XMLHttpRequest();
-            var body = 'email=' + encodeURIComponent(email) +'&password=' + encodeURIComponent(md5(pass))+'&csrfmiddlewaretoken='+encodeURIComponent('{{csrf_token}}');
+            var body = 'email=' + encodeURIComponent(email) +'&password=' + encodeURIComponent(encrypted_pass)+'&csrfmiddlewaretoken='+encodeURIComponent('{{csrf_token}}');
             xhr.open("POST", '/authorize/', true);
             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
             xhr.onreadystatechange = function() {

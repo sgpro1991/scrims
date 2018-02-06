@@ -15,6 +15,7 @@ class User(models.Model):
     about = models.TextField(blank=True)
     is_deleted = models.BooleanField(blank=True,default=False)
     status = models.BooleanField(blank=True,default=False)
+    public_key_user = models.CharField(max_length=255, blank=True)
     def image_tag(self):
         return mark_safe('<img src='+MEDIA_URL+'%s style="max-width:200px" />' % (self.image))
     image_tag.short_description = 'Image'

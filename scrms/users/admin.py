@@ -7,16 +7,17 @@ import hashlib
 
 
 class UserAdmin(admin.ModelAdmin):
-    fields = ('image', 'image_tag','name','hash_password','email','phone','position','subordinate','about','status')
+    fields = ('image', 'image_tag','name','hash_password','email','phone','position','public_key_user','subordinate','about','status')
     readonly_fields = ('image_tag',)
     def save_model(self, request, obj, form, change):
 
         obj.user = request.user
         if obj.id is None:
             password = get_random_string(length=11)
+            publick_key = get_random_string(length=32)
             crypt = Crypto().Encrypt(password)
-            hash_md5 = hashlib.md5(password.encode('utf-8'))
-            print(hash_md5.hexdigest())
+            hash_sha256 = hashlib.sha256(password.encode('utf-8'))
+            print(hash_sha256.hexdigest())
         else:
             crypt = ''
 
@@ -24,7 +25,7 @@ class UserAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if crypt != '':
             print(password)
-            User.objects.filter(id=obj.id).update(password=crypt,hash_password=hash_md5.hexdigest())
+            User.objects.filter(id=obj.id).update(password=crypt,hash_password=hash_sha256.hexdigest(),public_key_user=publick_key)
 
 
 

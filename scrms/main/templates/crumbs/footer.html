@@ -2,11 +2,18 @@
 <footer></footer>
 <script src="/static/js/vendor/modernizr-3.5.0.min.js"></script>
 
+<!-- crypto-js -->
+<script src="/static/js/vendor/crypto-js/crypto-js.min.js"></script>
+<!-- crypto-js -->
 
-<!-- MD5 -->
-<script src="/static/js/vendor/md5.js"></script>
-<!-- MD5 -->
 
+
+<!-- AES crypto -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/aes.min.js"></script>
+<!-- / AES crypto -->
+
+
+<script src="/static/js/vendor/crypto-js/sha256.min.js"></script>
 
 
 <!-- dropzone -->
@@ -50,25 +57,19 @@
 <!-- SCRIMS CHAT -->
 <script type="text/babel">
 
+
+
+/*
 let p = 41
 let g = 6
 
-
-
 let a = 11
-let A = Math.pow(g,a)%p
+let A = Math.pow(g,a)%p //public
 //alert(A)
 
-
-
-
-let b = 17
-let B = Math.pow(g,b)%p
+let b = 19
+let B = Math.pow(g,b)%p //public
 //alert(B)
-
-
-
-
 
 var s1 = Math.pow(B,a)%p
 var s2 = Math.pow(A,b)%p
@@ -76,14 +77,15 @@ var s2 = Math.pow(A,b)%p
 
 console.log(s1)
 console.log(s2)
-console.log(md5(s1))
-console.log(md5(s2))
-
+console.log(s1)
+console.log(s2)
+*/
 
 
 const LANG = 0 //{{lang}}
 const USER_ID = {{user.id}}
-const USERS = [{% for item in users  %}{"id":"{{item.id}}","name":"{{item.name}}","img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}"},{% endfor %}]
+const KEY = "{{user.public_key_user}}"
+const USERS = [{% for item in users  %}{"id":"{{item.id}}","name":"{{item.name}}","count_msg":"{{item.count_msg}}","img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}","public_key":"{{item.public_key_user}}"},{% endfor %}]
 
 //config
 moment.locale("ru");
@@ -187,11 +189,12 @@ function CHAT(){
 
   function SELECT_COMPANION(id){
 
+
       let user = USERS.filter(data => data.id==id)
 
       $('#scrims_chat_canvas').attr("data-init",id)
       $('#scrims_chat_heading').empty()
-      $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-3 heading-avatar" data-init="${user[0].id}">
+      $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-3 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key}>
             <div class="heading-avatar-icon">
               <img src="${user[0].img}">
             </div>
@@ -199,15 +202,12 @@ function CHAT(){
           <div class="col-sm-8 col-xs-7 heading-name">
             <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
            </a>
-            <span class="heading-online">Online</span>
           </div>
-
           `)
 
           GET_HISTORY(id)
 
           $('#scrims_chat_textarea').focus()
-
   }
 
 
@@ -237,7 +237,7 @@ function CHAT(){
                           $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
                   },10)
 
-
+                  $('.scrims_chat_count_message').remove()
               })
   }
 
@@ -253,14 +253,17 @@ function CHAT(){
 
             var messages_read = []
 
-    $.each(result.reverse(),function(k,v){
 
+
+    $.each(result.reverse(),function(k,v){
 
         if(v.message=='recive'){
           messages_read.push(v.id) // статус прочитанных сообщений
           var cls_mess = 'receiver'
+          var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
         }else {
           var cls_mess = 'sender'
+          var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
         }
 
         let date = moment(v.date).calendar()
@@ -286,11 +289,14 @@ function CHAT(){
 
         //console.log(read)
 
+
+
+
         $('#scrims_chat_canvas').prepend(`<div id="id_msg_${v.id}" class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}" style="display:none">
             <div class="col-sm-12 message-main-${cls_mess}">
               <div class="${cls_mess}">
                 <div class="message-text">
-                  ${v.body}
+                  ${decrypt}
                 </div>
                 <span class="message-time pull-right">
                   ${moment(v.date).calendar()}
@@ -335,6 +341,9 @@ function CHAT(){
   }
 
 
+
+
+
   function SEND_AJAX_MESSAGE(msg_object){
 
     if(isNaN(msg_object.companion) == true){return false}//if not found recipient
@@ -374,8 +383,21 @@ function SEND_MESSAGE(id_user,id_companion,type,message){
   //smiles
   //message = message.replace(/=)/g, "<br>")
 
+  var public_key = $('#scrims_chat_init').attr('data-public-key')
+
+
+
+  console.log(public_key)
+
+  let crypt_msg = CryptoJS.AES.encrypt(message,public_key).toString();
+  let decrypt = CryptoJS.AES.decrypt(crypt_msg,public_key).toString(CryptoJS.enc.Utf8);
+
+
+  console.log(crypt_msg,"------crypt-------",decrypt)
+
   let date = moment().format('YYYY-MM-DD HH:mm:ss')
-  let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
+  //let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
+  let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":crypt_msg,"date":date,"csrfmiddlewaretoken":csrf_token}
 
   if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
   SCROLL_TO_BOTTOM()
@@ -418,6 +440,7 @@ function READED_MSG(id_msg){
 
   MAIN_AJAX_GET('/api/read-msg/'+id_msg+'/').then(function(result){
     console.log(result)
+    socket.emit("msg readed",{"id_msg":id_msg})
   })
 
 }
@@ -425,14 +448,19 @@ function READED_MSG(id_msg){
 
 function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
+
+
   // Парсим сообщение которое пришло нам т.е. reciver
   if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
+
+    let decrypt = CryptoJS.AES.decrypt(data.body,KEY).toString(CryptoJS.enc.Utf8);
+
 
     $('#scrims_chat_canvas').append(`<div id="id_msg_${data.id_msg}" class="row message-body scrims_chat_msg_receiver" data-init="${data.id_msg}">
               <div class="col-sm-12 message-main-receiver">
                 <div class="receiver">
                   <div class="message-text">
-                    ${data.body}
+                    ${decrypt}
                   </div>
                   <span class="message-time pull-right">
                     ${moment().calendar()}
@@ -441,19 +469,22 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
               </div>
             </div>`)
           $('.heading-typing').fadeOut(200)
+
           SCROLL_TO_BOTTOM()
-          socket.emit("msg readed",{"id_msg":data.id_msg})
           READED_MSG(data.id_msg)
 
 
   }  // Парсим сообщение которое мы отправили
   else if(data.user === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.companion){
 
+
+        let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+
         $('#scrims_chat_canvas').append(`<div id="id_msg_${data.id_msg}" class="row message-body scrims_chat_msg_main" data-init="${data.id_msg}">
             <div class="col-sm-12 message-main-sender">
               <div class="sender">
                 <div class="message-text">
-                  ${data.body}
+                  ${decrypt}
                 </div>
                 <span class="message-time pull-right">
                   ${moment().calendar()}
@@ -478,8 +509,15 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 function MESSAGE_NO_SEE(data){
   if (data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) != data.user) {
         $('.scrims_chat_companion').each(function() {
+
           if($(this).attr('data-init') == data.user){
-            $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">1</b>')
+            var count = parseInt($('.scrims_chat_count_message').text())
+
+            if(isNaN(count)==true){
+              $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">1</b>')
+            }else{
+              $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">'+(count+1)+'</b>')
+            }
           }
         })
     }
@@ -488,7 +526,6 @@ function MESSAGE_NO_SEE(data){
 
 
 function MSG_DELIVERED(data){
-  console.log(data)
   $('#id_msg_'+data.id_msg).find('.delivered_msg').css({'color':'#4fce3b'})
 }
 
@@ -596,6 +633,11 @@ function debounce(func, wait, immediate) {
 
 
 }//end chat
+
+
+
+
+
 
 
 
