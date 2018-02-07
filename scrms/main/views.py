@@ -6,7 +6,7 @@ from users.models import User,Storage,Message
 from django.utils.crypto import get_random_string
 import os
 import json
-from datetime import datetime
+from datetime import datetime,date
 import re
 from PIL import Image
 import hashlib
@@ -86,8 +86,6 @@ def Auth(request):
 
 
 
-
-
 def FileUpload(request):
 
     user = CheckAuth(request)
@@ -101,8 +99,17 @@ def FileUpload(request):
 
     type_file = (os.path.splitext(file_add.name)[1]).replace(".",'')
     usr = User.objects.get(id=user[0]['id'])
+    data=file_add.read()
 
-    insert = Storage(user=usr,type_file=type_file,name=file_add.name,hash_name=name,date=datetime.now(),data=crypto.Encrypt(file_add.read()))
+    path = BASE_DIR+'/media/storage/'+str(date.today())+'/'
+    url = '/media/storage/'+str(date.today())+'/'
+    if not os.path.exists(path):
+        os.makedirs(path)
+
+    with open(path+name,'wb') as f:
+        f.write(crypto.Encrypt(data))
+
+    insert = Storage(user=usr,type_file=type_file,name=file_add.name,path=path,hash_name=name,date=datetime.now())
     insert.save()
     url = "/storage/"+str(insert.id)+"/"
     Storage.objects.filter(id=int(insert.id)).update(url=url)
@@ -136,7 +143,10 @@ def StorageView(request,id):
         return HttpResponse(status=404)
 
     file_storage = Storage.objects.get(pk=id)
-    data = (crypto.Decrypt(file_storage.data))
+
+    with open(file_storage.path+file_storage.hash_name,'rb') as f:
+        data = crypto.Decrypt(f.read())
+
 
     f_type = file_storage.type_file.replace('.','')
     images_type = ["jpg","JPG","gif","JPEG","png","PNG","tiff","GIF"]
@@ -159,17 +169,6 @@ def StorageView(request,id):
 
 
 
-
-from Crypto.Cipher import AES
-def Test(request):
-    obj = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
-    message = '<h1></h1>1234567'
-    ciphertext = obj.encrypt(message)
-    obj2 = AES.new('This is a key123', AES.MODE_CBC, 'This is an IV456')
-    decrypt = obj2.decrypt(ciphertext)
-    print(ciphertext,decrypt)
-    a = render(request,'test.html',{"html":ciphertext})
-    return HttpResponse(a)
 
 
 
@@ -251,4 +250,4 @@ def Main(request):
         })
 
     print(user_mass)
-    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':LANG})
+    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})

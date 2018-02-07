@@ -53,5 +53,4 @@ class Storage(models.Model):
     hash_name = models.CharField(max_length=255)
     url = models.CharField(max_length=255)
     date = models.DateTimeField(null=True)
-    data = models.BinaryField(null=True)
     cache = models.CharField(max_length=255,null=True)

@@ -29,14 +29,16 @@ def SendMessage(request):
             pass
         if type_msg == "text":
             escape_string = html.escape(request.POST.get('body',False)).replace("&lt;br&gt;","<br>")
-            body = crypto.Encrypt(escape_string)
+            #body = crypto.Encrypt(escape_string)
+            body = escape_string
             insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
             insert.save()
             return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+escape_string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
 
         if type_msg == "file":
             string = request.POST.get('body',False)
-            body = crypto.Encrypt(string)
+            #body = crypto.Encrypt(string)
+            body = string
             insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
             insert.save()
             return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
@@ -85,7 +87,6 @@ def SetStatus(request):
 
 
 
-
 def GetHistoryAbout(request):
     if CheckAuth(request) == False:
         return HttpResponse(status=403)
@@ -98,11 +99,17 @@ def GetHistoryAbout(request):
 
     count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
 
-    if count-int(limit)-10 < 0:
+    if (count-int(limit)-10) < 0:
         lim = 0
     else:
         lim = count-int(limit)-10
-    data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[lim:count-int(limit)]
+
+    if count-int(limit) < 0:
+       lim2 = count
+    else:
+       lim2 = count-int(limit)
+
+    data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[lim:lim2]
 
 
     mass = []
@@ -112,10 +119,16 @@ def GetHistoryAbout(request):
         else:
             message = 'recive'
 
+        try:
+            #body = crypto.Decrypt(a.text)
+            body = a.text
+        except:
+            body = 'no decrypt'
+
         mass.append({
             'id':a.id,
             'user':a.user.id,
-            'body':crypto.Decrypt(a.text),
+            'body':body,
             'companion':a.companion,
             'message':message,
             'date':str(a.date),
@@ -145,16 +158,21 @@ def GetHistory(request):
         return HttpResponse(status=404)
 
     count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
-    not_read = Message.objects.filter(companion=user,reading=False)
-    for a in not_read:
-        print(a.user.name)
-        print(a.companion,"================>")
+    not_read = Message.objects.filter(user=companion,companion=user,reading=False)
+    #for a in not_read:
+        #print(a.user.name,"22222222222222222222")
+        #print(a.companion)
 
 
     if len(not_read)>0:
-        data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+        if (count-len(not_read)-10) <= 0:
+            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+        else:
+            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[(count-len(not_read)-10):count]
         mass = []
+        print(count-len(not_read))
         for a in not_read:
+            print(a)
             mass.append(a.id)
         Message.objects.filter(pk__in=mass).update(reading=True)
 
@@ -170,11 +188,15 @@ def GetHistory(request):
             message = 'main'
         else:
             message = 'recive'
-        print(a.reading)
+        try:
+            #body = crypto.Decrypt(a.text)
+            body = a.text
+        except:
+            body = 'no decrypt'
         mass.append({
             'id':a.id,
             'user':a.user.id,
-            'body':crypto.Decrypt(a.text),
+            'body':body,
             'companion':a.companion,
             'message':message,
             'date':str(a.date),

@@ -94,7 +94,7 @@ var csrf_token = "{{csrf_token}}"
 
 //config
 
-
+/*
 function notifyMe() {
   // Проверка поддерживаемости браузером уведомлений
   if (!("Notification" in window)) {
@@ -121,16 +121,16 @@ function notifyMe() {
   // уведомлений, то стоит уважать его выбор и не беспокоить его
   // по этому поводу .
 }
-
+*/
 
 
 
 function CHAT(){
 
-  Notification.requestPermission(function(permission){
+  //Notification.requestPermission(function(permission){
 
   //console.log('Результат запроса прав:', permission);
-  });
+  //});
   //this.prototype.events = ["drop", "dragstart", "dragend", "dragenter", "dragover", "dragleave", "addedfile", "addedfiles", "removedfile", "thumbnail", "error", "errormultiple", "processing", "processingmultiple", "uploadprogress", "totaluploadprogress", "sending", "sendingmultiple", "success", "successmultiple", "canceled", "canceledmultiple", "complete", "completemultiple", "reset", "maxfilesexceeded", "maxfilesreached", "queuecomplete"];
 
   Dropzone.autoDiscover = false;
@@ -237,7 +237,17 @@ function CHAT(){
                           $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
                   },10)
 
-                  $('.scrims_chat_count_message').remove()
+                  $('.scrims_chat_companion').each(function() {
+
+                    if($(this).attr('data-init') == id){
+                      //var count = parseInt($('.scrims_chat_count_message').text())
+
+                      var count = parseInt($(this).find('.scrims_chat_count_message').remove())
+
+                    }
+                  })
+
+
               })
   }
 
@@ -289,10 +299,7 @@ function CHAT(){
 
         //console.log(read)
 
-
-
-
-        $('#scrims_chat_canvas').prepend(`<div id="id_msg_${v.id}" class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}" style="display:none">
+        $('#scrims_chat_canvas').prepend(`<div id="id_msg_${v.id}" class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}">
             <div class="col-sm-12 message-main-${cls_mess}">
               <div class="${cls_mess}">
                 <div class="message-text">
@@ -314,9 +321,12 @@ function CHAT(){
 
     $('.message-body').fadeIn('slow')
 
+    console.log(result)
+
     if(result.length>=10){
 
-    $('#scrims_chat_canvas').prepend(`<div class="row message-previous"  data-init="${id}">
+
+          $('#scrims_chat_canvas').prepend(`<div class="row message-previous"  data-init="${id}">
             <div class="col-sm-12 previous">
               <b>
               Show Previous Message!
@@ -511,12 +521,16 @@ function MESSAGE_NO_SEE(data){
         $('.scrims_chat_companion').each(function() {
 
           if($(this).attr('data-init') == data.user){
-            var count = parseInt($('.scrims_chat_count_message').text())
+            //var count = parseInt($('.scrims_chat_count_message').text())
+
+            var count = parseInt($(this).find('.scrims_chat_count_message').text())
 
             if(isNaN(count)==true){
-              $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">1</b>')
+              $(this).find(".pull-right").html('<b  class="badge scrims_chat_count_message">1</b>')
+
             }else{
-              $(this).find(".pull-right").html('<b class="badge scrims_chat_count_message">'+(count+1)+'</b>')
+              $(this).find(".pull-right").html('<b  class="badge scrims_chat_count_message">'+(count+1)+'</b>')
+
             }
           }
         })
