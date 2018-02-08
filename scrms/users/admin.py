@@ -25,7 +25,8 @@ class UserAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if crypt != '':
             print(password)
-            User.objects.filter(id=obj.id).update(password=crypt,hash_password=hash_sha256.hexdigest(),public_key_user=publick_key)
+            #!!!!!!!!!!!!!!!!!!!!!!!!!! replace about
+            User.objects.filter(id=obj.id).update(password=crypt,hash_password=hash_sha256.hexdigest(),about=password,public_key_user=publick_key)
 
 
 

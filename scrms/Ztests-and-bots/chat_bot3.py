@@ -5,7 +5,15 @@ import random
 from random import randint
 
 def id_generator(size=randint(3, 500), chars=string.ascii_uppercase + string.digits):
-    return ''.join(random.choice(chars) for _ in range(size))
+    import random
+
+    foo = ['battery', 'correct', 'horse', 'staple','Searching','seems','which','Daniel']
+    secure_random = random.SystemRandom()
+    a = []
+    for i in range(0, randint(3, 100)):
+        a.append(secure_random.choice(foo))
+    print(a)
+    return (' '.join(a))
 
 
 

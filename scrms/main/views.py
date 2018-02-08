@@ -61,7 +61,7 @@ def Auth(request):
                 resp.set_cookie('SCRIMS_TOKEN',token)
 
                 with open(BASE_DIR+'/sessions/'+token,'w',encoding='utf-8') as f:
-                     json = '[{"id":"'+str(a.id)+'"}]'
+                     json = '[{"id":"'+str(a.id)+'","ip":"'+request.META.get('REMOTE_ADDR')+'"}]'
                      f.write(crypto.Encrypt(json))
                 return resp
 
@@ -180,6 +180,12 @@ def CheckAuth(request):
         if check == True:
             f = open(BASE_DIR+'/sessions/'+request.COOKIES['SCRIMS_TOKEN'], encoding='utf-8')
             json_user = json.loads(crypto.Decrypt(f.read()))
+            print(json_user,request.META.get('REMOTE_ADDR'))
+            if json_user[0]['ip'] != request.META.get('REMOTE_ADDR'):
+                return False
+            else:
+                pass
+
             return (json_user)
         else:
             return False
@@ -234,14 +240,14 @@ def Main(request):
         return redirect('/auth/')
 
     user_data = User.objects.get(pk=user[0]['id'])
-
-
     users = User.objects.all().exclude(pk=user[0]['id'])
 
     user_mass = []
     for a in users:
         count = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False).count()
+        print(a.name.split(" "))
         user_mass.append({
+            "search":a.name.split(" "),
             "id":a.id,
             "name":a.name,
             "count_msg":count,
@@ -249,5 +255,6 @@ def Main(request):
             "public_key_user":a.public_key_user,
         })
 
-    print(user_mass)
+    #print(user_mass)
     return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})
+    #return render(request,"react/react-home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})
