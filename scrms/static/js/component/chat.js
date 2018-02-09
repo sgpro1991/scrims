@@ -23,6 +23,8 @@ console.log(s2)
 
 function CHAT(USER_ID,KEY,USERS,socket,csrf_token,noty){
 
+  var width_window = $(window).width()
+
   Dropzone.autoDiscover = false;
   var myDropzone = new Dropzone("#dropzone-chat",);
 
@@ -551,10 +553,8 @@ socket.on('msg readed',data=>MSG_READED(data))
 
     SELECT_COMPANION($(this).attr('data-init'))
 
-    var height_window = $(window).width()
 
-
-    if(height_window<700){
+    if(width_window<700){
         $('.conversation').addClass('active_chat_conversation')
     }
 
