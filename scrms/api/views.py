@@ -48,6 +48,15 @@ def SendMessage(request):
 
 
 
+def GetStatus(request,id_user):
+    if CheckAuth(request) == False:
+        return HttpResponse(status=403)
+    if id_user:
+        user = User.objects.get(id=id_user)
+        if user:
+            return HttpResponse('{"status":'+str(int(user.status))+'}')
+
+
 
 
 def ReadMsg(request,id_msg):

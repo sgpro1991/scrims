@@ -64,25 +64,33 @@ function CHAT(USER_ID,KEY,USERS,socket,csrf_token,noty){
 
   function SELECT_COMPANION(id){
 
-      let user = USERS.filter(data => data.id==id)
+      MAIN_AJAX_GET('/api/get-status/'+id+'/').then(function(result){
+        if(result.status == true){
+            var status = '<span style="margin: 7px 11px;width:10px;height:10px" class="scrims_chat_status scrims_chat_status_online"></span>'
+        }else{
+            var status = '<span style="margin: 7px 11px;width:10px;height:10px"  class="scrims_chat_status scrims_chat_status_offline"></span>'
+        }
 
-      $('#scrims_chat_canvas').attr("data-init",id)
-      $('#scrims_chat_heading').empty()
-      $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-3 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key}>
-            <div class="heading-avatar-icon">
-              <img src="${user[0].img}">
-            </div>
-            </div>
-          <div class="col-sm-8 col-xs-7 heading-name">
-            <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
-           </a>
-          </div>
-          `)
+          let user = USERS.filter(data => data.id==id)
+          $('#scrims_chat_canvas').attr("data-init",id)
+          $('#scrims_chat_heading').empty()
+          $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-3 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key}>
+                <div class="heading-avatar-icon">
+                  <img src="${user[0].img}">
+                </div>
+                </div>
+              <div class="col-sm-8 col-xs-7 heading-name">
+                <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
+                 ${status}
+               </a>
 
-          GET_HISTORY(id)
-
-          $('#scrims_chat_textarea').focus()
+              </div>
+              `)
+            GET_HISTORY(id)
+            $('#scrims_chat_textarea').focus()
+    })
   }
+
 
 
   function PREVIOUS_MESSAGE(id){
@@ -303,8 +311,13 @@ function STATUS_CONECTED(data){
       if(data.status == 'on'){
         $('.scrims_chat_companion').each(function(){
           var id = $(this).attr('data-init')
+
           if(id == data.id_user){
             $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_offline').addClass('scrims_chat_status_online')
+            $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion shake-'+id+'" data-init="'+id+'">'+$(this).html())
+
+
+            $(this).remove()
           }
         })
       }
@@ -312,16 +325,18 @@ function STATUS_CONECTED(data){
         $('.scrims_chat_companion').each(function(){
           var id = $(this).attr('data-init')
           if(id == data.id_user){
-            $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_online').addClass('scrims_chat_status_offline')
+            $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_offline').addClass('scrims_chat_status_offline')
+            $('#scrims_chat_contact_list').append('<div class="row sideBar-body scrims_chat_companion" data-init="'+id+'">'+$(this).html())
+            $(this).remove()
           }
         })
       }
 
+      SELECT_COMPANION_ACTION()
 }
 
 
 function READED_MSG(id_msg){
-
   MAIN_AJAX_GET('/api/read-msg/'+id_msg+'/').then(function(result){
     console.log(result)
     socket.emit("msg readed",{"id_msg":id_msg})
@@ -395,20 +410,26 @@ function MESSAGE_NO_SEE(data){
         $('.scrims_chat_companion').each(function() {
 
           if($(this).attr('data-init') == data.user){
+
+
+
             //var count = parseInt($('.scrims_chat_count_message').text())
-
             var count = parseInt($(this).find('.scrims_chat_count_message').text())
-
             if(isNaN(count)==true){
-              $(this).find(".pull-right").html('<b  class="badge scrims_chat_count_message">1</b>')
-
+              $(this).find(".pull-right").html('<div  class="badge scrims_chat_count_message shake-'+data.user+'">1</div>')
             }else{
-              $(this).find(".pull-right").html('<b  class="badge scrims_chat_count_message">'+(count+1)+'</b>')
+              $(this).find(".pull-right").html('<div  class="badge scrims_chat_count_message shake-'+data.user+'">'+(count+1)+'</div>')
 
             }
-
             user = USERS.filter(a => a.id==parseInt(data.user))
             noty(user[0].name, user[0].img, 'Отправил(а) вам') //-----------------------------------> lang
+
+
+
+            $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion" data-init="'+data.user+'">'+$(this).html())
+            $(this).remove()
+            $('.shake-'+data.user).effect('shake', { times:3 }, 300);
+
           }
         })
     }
@@ -467,6 +488,8 @@ socket.on('msg readed',data=>MSG_READED(data))
       }
   });
 
+
+
   $('#searchText').off('keydown')
   $('#searchText').on('keydown',function(e){
 
@@ -489,9 +512,9 @@ socket.on('msg readed',data=>MSG_READED(data))
 
     $.each(users,function(k,v){
         $('#scrims_chat_contact_list').append(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}">
-                <span class="scrims_chat_status scrims_chat_status_offline"></span>
+                <!--<span class="scrims_chat_status scrims_chat_status_offline"></span>-->
                 <span class="scrims_chat_status"></span>
-                <div class="col-sm-3 col-xs-3 sideBar-avatar">
+                <div class="col-sm-2 col-xs-2 sideBar-avatar">
                   <div class="avatar-icon">
                       <img src="${v.img}" width="50" height="50">
                   </div>
@@ -502,7 +525,7 @@ socket.on('msg readed',data=>MSG_READED(data))
                       <span class="name-meta">${v.name}
                     </span>
                     </div>
-                    <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
+                    <div class="col-sm-3 col-xs-3 pull-right sideBar-time">
                       <span class="time-meta pull-right">
                     </span>
                     </div>
@@ -518,12 +541,24 @@ socket.on('msg readed',data=>MSG_READED(data))
 
   function SELECT_COMPANION_ACTION(){
   $('.scrims_chat_companion').off('click')
-  $('.scrims_chat_companion').on('click',function(){
+  $('#scrims_chat_contact_list').on('click', '.scrims_chat_companion',function(){
+
+
+
     if($(this).hasClass('cleanstate_chat_companion') == true){return false}
     $('.scrims_chat_companion').removeClass('cleanstate_chat_companion')
     $(this).addClass('cleanstate_chat_companion');
 
     SELECT_COMPANION($(this).attr('data-init'))
+
+    var height_window = $(window).width()
+
+
+    if(height_window<700){
+        $('.conversation').addClass('active_chat_conversation')
+    }
+
+
   })
 }
 
@@ -589,6 +624,13 @@ function debounce(func, wait, immediate) {
   $('.fa-upload').click(function(){
     $('.dz-hidden-input').click()
   })
+
+
+//mobile actions
+
+
+
+
 
 
 

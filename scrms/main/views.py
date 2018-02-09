@@ -240,7 +240,7 @@ def Main(request):
         return redirect('/auth/')
 
     user_data = User.objects.get(pk=user[0]['id'])
-    users = User.objects.all().exclude(pk=user[0]['id'])
+    users = User.objects.all().exclude(pk=user[0]['id']).order_by('-status')
 
     user_mass = []
     for a in users:
@@ -252,6 +252,7 @@ def Main(request):
             "name":a.name,
             "count_msg":count,
             "image":a.image,
+            "status":a.status,
             "public_key_user":a.public_key_user,
         })
 

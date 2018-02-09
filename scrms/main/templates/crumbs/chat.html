@@ -45,12 +45,12 @@
           {% for item in users  %}
               <div class="row sideBar-body scrims_chat_companion" data-init="{{item.id}}">
                 {% if item.status == True %}
-                  <span class="scrims_chat_status scrims_chat_status_online"></span>
+                <span class="scrims_chat_status scrims_chat_status_online"></span>
                 {% else %}
                 <span class="scrims_chat_status scrims_chat_status_offline"></span>
                 {% endif %}
                 <span class="scrims_chat_status"></span>
-                <div class="col-sm-3 col-xs-3 sideBar-avatar">
+                <div class="col-sm-2 col-xs-2 sideBar-avatar">
                   <div class="avatar-icon">
                     {% thumbnail item.image "50x50" crop="center" as im %}
                       <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
@@ -64,7 +64,7 @@
                       <span class="name-meta">{{item.name}}
                     </span>
                     </div>
-                    <div class="col-sm-4 col-xs-4 pull-right sideBar-time">
+                    <div class="col-sm-3 col-xs-3 pull-right sideBar-time">
                       <span class="time-meta pull-right">
                     </span>
                         {% if item.count_msg != 0 %}
