@@ -44,14 +44,19 @@
 
           {% for item in users  %}
               <div class="row sideBar-body scrims_chat_companion" data-init="{{item.id}}">
+                <!--
                 {% if item.status == True %}
                 <span class="scrims_chat_status scrims_chat_status_online"></span>
                 {% else %}
                 <span class="scrims_chat_status scrims_chat_status_offline"></span>
                 {% endif %}
-                <span class="scrims_chat_status"></span>
+                <span class="scrims_chat_status"></span>-->
                 <div class="col-sm-2 col-xs-2 sideBar-avatar">
-                  <div class="avatar-icon">
+                  {% if item.status == True %}
+                  <div class="avatar-icon avatar-icon-active">
+                  {% else %}
+                    <div class="avatar-icon">
+                  {% endif %}
                     {% thumbnail item.image "50x50" crop="center" as im %}
                       <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
                     {% endthumbnail %}
@@ -307,8 +312,12 @@
       </div>
 
 
+      <div class="col-sm-1 col-xs-1  heading-dot pull-right">
+        <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>
+      </div>
+
         <div class="col-sm-1 col-xs-1  heading-dot pull-right">
-          <i class="fa fa-ellipsis-v fa-2x  pull-right" aria-hidden="true"></i>
+          <i class="glyphicon glyphicon-menu-left fa-2x  pull-right" id="reply-to-chat" aria-hidden="true"></i>
         </div>
       </div>
 
@@ -338,20 +347,22 @@
         <img style="width: 55px;height: 55px;margin: -13px;" src="/static/img/typing.gif"/>
         </div>
 
+        <!--<div class="col-sm-1 col-xs-1 reply-emojis">
+
+        </div>-->
         <div class="col-sm-1 col-xs-1 reply-emojis">
-          <i class="fa fa-smile-o fa-2x"></i>
-        </div>
-        <div class="col-sm-1 col-xs-1 reply-emojis">
-          <i class="fa fa-upload fa-2x"></i>
+          <i class="glyphicon glyphicon-paperclip fa-2x" id="scrims-upload"></i>
         </div>
         <div class="col-sm-9 col-xs-9 reply-main">
-          <textarea class="form-control" rows="1" id="scrims_chat_textarea"  ></textarea>
+          <textarea class="form-control upload-dropzone" rows="1" id="scrims_chat_textarea" ></textarea>
         </div>
         <!--<div class="col-sm-1 col-xs-1 reply-recording">
           <i class="fa fa-microphone fa-2x" aria-hidden="true"></i>
         </div>-->
-        <div class="col-sm-1 col-xs-1 reply-send" id="scrims_chat_send">
+        <div class="col-sm-2 col-xs-2 reply-send reply-emojis" id="scrims_chat_send">
+          <i class="fa fa-smile-o fa-2x"></i>
           <i class="fa fa-send fa-2x" aria-hidden="true"></i>
+
         </div>
       </div>
 

@@ -244,8 +244,11 @@ def Main(request):
 
     user_mass = []
     for a in users:
-        count = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False).count()
-        print(a.name.split(" "))
+        messages = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False)
+
+        count = len(messages)
+
+
         user_mass.append({
             "search":a.name.split(" "),
             "id":a.id,
@@ -253,6 +256,7 @@ def Main(request):
             "count_msg":count,
             "image":a.image,
             "status":a.status,
+            #"last_message":last_message,
             "public_key_user":a.public_key_user,
         })
 
