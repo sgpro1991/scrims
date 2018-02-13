@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User,Message,Storage
+from .models import User,Message,Storage,LastMessage
 from main.views import Crypto
 from django.utils.crypto import get_random_string
 from sorl.thumbnail import get_thumbnail
@@ -32,6 +32,7 @@ class UserAdmin(admin.ModelAdmin):
 
 
 
+admin.site.register(LastMessage)
 admin.site.register(Message)
 admin.site.register(Storage)
 

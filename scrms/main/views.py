@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from scrms.settings import BASE_DIR,LANG,MEDIA_ROOT,MEDIA_URL
-from users.models import User,Storage,Message
+from users.models import User,Storage,Message,LastMessage
 from django.utils.crypto import get_random_string
 import os
 import json
@@ -244,9 +244,8 @@ def Main(request):
 
     user_mass = []
     for a in users:
-        messages = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False)
-
-        count = len(messages)
+        count = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False).count()
+        last_message = LastMessage.objects.filter(companion_1=int(a.id),companion_2=int(user[0]['id'])) | LastMessage.objects.filter(companion_1=int(user[0]['id']),companion_2=int(a.id))
 
 
         user_mass.append({
@@ -256,7 +255,7 @@ def Main(request):
             "count_msg":count,
             "image":a.image,
             "status":a.status,
-            #"last_message":last_message,
+            "last_msg":last_message,
             "public_key_user":a.public_key_user,
         })
 

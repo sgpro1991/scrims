@@ -43,6 +43,14 @@ class Message(models.Model):
 
 
 
+class LastMessage(models.Model):
+    companion_1 = models.IntegerField()
+    companion_2 = models.IntegerField()
+    text = models.TextField()
+    id_msg = models.IntegerField()
+    type_msg = models.CharField(max_length=10)
+
+
 
 
 class Storage(models.Model):

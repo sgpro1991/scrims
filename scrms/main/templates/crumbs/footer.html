@@ -78,7 +78,18 @@
 const LANG = 0 //{{lang}}
 const USER_ID = {{user.id}}
 const KEY = "{{user.public_key_user}}"
-const USERS = [{% for item in users  %}{"search":[{% for a in item.search %}"{{a}}",{% endfor %}],"id":"{{item.id}}","name":"{{item.name}}","count_msg":"{{item.count_msg}}","img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}","public_key":"{{item.public_key_user}}"},{% endfor %}]
+const USERS = [{% for item in users  %}
+                {
+                "search":[{% for a in item.search %}"{{a}}",{% endfor %}],
+                "id":"{{item.id}}","name":"{{item.name}}",
+                "count_msg":"{{item.count_msg}}",
+                "img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}",
+                "public_key":"{{item.public_key_user}}",
+                "last_msg":"{{item.last_msg.0.text}}",
+                "last_msg_type":"{{item.last_msg.0.type_msg}}",
+                "status":{% if item.status == True %}true{% else %}false{% endif %}
+               },
+               {% endfor %}]
 
 //config
 moment.locale("ru");

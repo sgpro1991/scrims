@@ -819,7 +819,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
 }
 
    .message {
-     padding: 130px 0 !important;
+     padding: 75px 0 !important;
      margin: 0 !important;
      /* background: url(w.jpg) no-repeat fixed center; */
      background-size: cover;
@@ -1012,7 +1012,24 @@ box-shadow: 0 0px 0px 2px #4ecb54;
   height: 10px;
 }
 
+.reply-send{
+  text-align: center;
+}
+
+
+
+
    @media screen and (max-width: 700px) {
+
+     .message-main-receiver {
+         max-width: 75%;
+     }
+
+.message-main-sender {
+    padding: 3px 20px !important;
+    margin-left: 25% !important;
+    max-width: 75%;
+}
 
      .container{
        padding-left: 0;
@@ -1021,6 +1038,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
 
      #reply-to-chat{
        display: block;
+       margin: 7px 0px;
      }
 
      .scrims_chat_status{
@@ -1058,6 +1076,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      .heading-avatar-icon img {
        height: 50px;
        width: 50px;
+       margin: 2px -5px;
      }
      .heading-compose {
        padding: 5px !important;
@@ -1068,7 +1087,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      }
      .heading-dot {
        padding: 5px !important;
-       margin-left: 10px !important;
+       margin-left: 0px !important;
      }
      .heading-dot i {
        color: #fff;
@@ -1137,6 +1156,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
 
      .message {
           height: 500px;
+          width: 100%;
      }
      .reply {
        height: 70px;

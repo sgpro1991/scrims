@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from main.views import *
-from users.models import User, Message
+from users.models import User, Message, LastMessage
 from datetime import datetime
 from django.utils.dateparse import parse_datetime
 from django.db.models import Q
@@ -27,21 +27,41 @@ def SendMessage(request):
             return HttpResponse(status=400)
         else:
             pass
+
+
+
+        def last_msg(insert,user,companion,type_msg):
+            last_msg = LastMessage.objects.filter(companion_1=int(user.id),companion_2=int(companion)) | LastMessage.objects.filter(companion_1=int(companion),companion_2=int(user.id))
+            if not last_msg:
+                print(type_msg)
+                insert = LastMessage(companion_1=int(user.id),companion_2=int(companion),text=request.POST.get('body',False),type_msg=type_msg,id_msg=insert.id)
+                insert.save()
+            else:
+                last_msg.update(text=request.POST.get('body',False),type_msg=type_msg,id_msg=insert.id)
+
+
+
         if type_msg == "text":
             escape_string = html.escape(request.POST.get('body',False)).replace("&lt;br&gt;","<br>")
             #body = crypto.Encrypt(escape_string)
             body = escape_string
             insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
             insert.save()
+            last_msg(insert,user,companion,type_msg)
             return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+escape_string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
 
         if type_msg == "file":
             string = request.POST.get('body',False)
             #body = crypto.Encrypt(string)
+
             body = string
             insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
             insert.save()
+            last_msg(insert,user,companion,type_msg)
             return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
+
+
+
     else:
         return HttpResponse(status=404)
 

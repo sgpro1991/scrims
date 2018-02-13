@@ -23,8 +23,124 @@ console.log(s2)
 
 function CHAT(USER_ID,KEY,USERS,socket,csrf_token,noty){
 
-  var width_window = $(window).width()
 
+
+
+
+function RENDER_USERS_ITEM(v,arg){
+
+  if(v.status == true){
+      var status = '<div class="avatar-icon avatar-icon-active">'
+  }else{
+      var status = '<div class="avatar-icon">'
+  }
+
+
+
+  if(v.count_msg != 0){
+      var count_msg = '<b class="badge scrims_chat_count_message">'+v.count_msg+'</b>'
+  }else{
+      var count_msg = ''
+  }
+
+
+
+  if(v.last_msg != ''){
+      if(v.last_msg_type == 'file'){
+          last_msg = '<img class="scrims_chat_message_file img_types" style="width:10px;width: 15px;opacity: 0.5" src="/static/img/file.png">'
+      }else{
+          try{
+            var last_msg = CryptoJS.AES.decrypt(v.last_msg, v.public_key).toString(CryptoJS.enc.Utf8).replace("<br>", "");
+          }catch(e){
+            var last_msg = CryptoJS.AES.decrypt(v.last_msg, KEY).toString(CryptoJS.enc.Utf8).replace("<br>", "");
+          }
+          if (last_msg == ''){
+            var last_msg = CryptoJS.AES.decrypt(v.last_msg, KEY).toString(CryptoJS.enc.Utf8).replace("<br>", "");
+          }
+      }
+  }else{
+      var last_msg = ''
+  }
+
+
+
+  if(arg === true){
+
+    $('#scrims_chat_contact_list').append(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}">
+        <div class="col-sm-2 col-xs-2 sideBar-avatar">
+          ${status}
+            <img src="${v.img}" width="50px" height="50px">
+          </div>
+        </div>
+        <div class="col-sm-9 col-xs-9 sideBar-main">
+          <div class="row">
+            <div class="col-sm-8 col-xs-8 sideBar-name">
+              <span class="name-meta">${v.name}</span>
+              <div class="name-meta" style="color: #999;color: #999;overflow: hidden;width: 100%;text-overflow: ellipsis;">${last_msg}</div>
+            </div>
+            <div class="col-sm-3 col-xs-3 pull-right sideBar-time">
+              <span class="time-meta pull-right">
+            </span>
+            ${count_msg}
+            </div>
+          </div>
+        </div>
+      </div>`)
+  }else{
+    $('#scrims_chat_contact_list').prepend(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}">
+        <div class="col-sm-2 col-xs-2 sideBar-avatar">
+          ${status}
+            <img src="${v.img}" width="50px" height="50px">
+          </div>
+        </div>
+        <div class="col-sm-9 col-xs-9 sideBar-main">
+          <div class="row">
+            <div class="col-sm-8 col-xs-8 sideBar-name">
+              <span class="name-meta">${v.name}</span>
+              <div class="name-meta" style="color: #999;color: #999;overflow: hidden;width: 100%;text-overflow: ellipsis;">${last_msg}</div>
+            </div>
+            <div class="col-sm-3 col-xs-3 pull-right sideBar-time">
+              <span class="time-meta pull-right">
+            </span>
+            ${count_msg}
+            </div>
+          </div>
+        </div>
+      </div>`)
+  }
+}
+
+
+
+
+
+function RENDER_USERS(USERS){
+
+  var mass = []
+
+  $.each(USERS,function(k,v){
+    if(v.count_msg != 0){
+      mass.push(v)
+    }else{
+      RENDER_USERS_ITEM(v,true)
+    }
+  })
+
+  $.each(mass,function(k,v){
+      RENDER_USERS_ITEM(v,false)
+  })
+
+}
+
+
+
+RENDER_USERS(USERS)
+
+
+
+
+
+  var width_window = $(window).width()
   Dropzone.autoDiscover = false;
   var myDropzone = new Dropzone("#dropzone-chat",);
 
@@ -49,7 +165,8 @@ function CHAT(USER_ID,KEY,USERS,socket,csrf_token,noty){
     }else{
       var body = `<div style='text-align:center'><a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='width:80px' src='/static/img/file.png'/><br></a><span>${jsn.name}</span></div>`
     }
-      SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body)
+
+    SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body)
 
     setTimeout(function(){
       $('.previewsContainer').empty()
@@ -76,12 +193,12 @@ function CHAT(USER_ID,KEY,USERS,socket,csrf_token,noty){
           let user = USERS.filter(data => data.id==id)
           $('#scrims_chat_canvas').attr("data-init",id)
           $('#scrims_chat_heading').empty()
-          $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-3 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key}>
+          $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-2 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key}>
                 <div class="heading-avatar-icon">
                   <img src="${user[0].img}">
                 </div>
                 </div>
-              <div class="col-sm-4 col-xs-4 heading-name">
+              <div class="col-sm-4 col-xs-7 heading-name">
                 <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
 
                </a>
@@ -293,7 +410,6 @@ function SEND_MESSAGE(id_user,id_companion,type,message){
   console.log(crypt_msg,"------crypt-------",decrypt)
 
   let date = moment().format('YYYY-MM-DD HH:mm:ss')
-  //let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":message,"date":date,"csrfmiddlewaretoken":csrf_token}
   let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":crypt_msg,"date":date,"csrfmiddlewaretoken":csrf_token}
 
   if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
@@ -309,6 +425,8 @@ function SCROLL_TO_BOTTOM(){
 }
 
 
+
+
 function STATUS_CONECTED(data){
     var token = data.token.replace(' ','')
 
@@ -319,12 +437,8 @@ function STATUS_CONECTED(data){
 
           if(id == data.id_user){
 
-
             $(this).find('.avatar-icon').addClass('avatar-icon-active')
-          //  $(this).find('.scrims_chat_status').removeClass('scrims_chat_status_offline').addClass('scrims_chat_status_online')
             $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion fade-'+id+'" data-init="'+id+'">'+$(this).html())
-
-
             $('.fade-'+id).effect('fade', { times:3 }, 300);
 
             $(this).remove()
@@ -336,9 +450,13 @@ function STATUS_CONECTED(data){
           var id = $(this).attr('data-init')
           if(id == data.id_user){
             $(this).find('.avatar-icon').removeClass('avatar-icon-active')
-            //$(this).find('.scrims_chat_status').removeClass('scrims_chat_status_offline').addClass('scrims_chat_status_offline')
-            $('#scrims_chat_contact_list').append('<div class="row sideBar-body scrims_chat_companion" data-init="'+id+'">'+$(this).html())
-            $(this).remove()
+
+            if(parseInt($(this).find('.scrims_chat_count_message').text()) > 0  ){
+
+            }else{
+              $('#scrims_chat_contact_list').append('<div class="row sideBar-body scrims_chat_companion" data-init="'+id+'">'+$(this).html())
+              $(this).remove()
+            }
           }
         })
       }
@@ -406,12 +524,6 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
               </div>
             </div>
           </div>`)
-
-
-          if(width_window<700){
-            $('#scrims_chat_textarea').blur()
-          }
-
 
         SCROLL_TO_BOTTOM()
 
@@ -494,17 +606,37 @@ socket.on('msg readed',data=>MSG_READED(data))
 //actions
   //click on "send icon" send message
 
+  function hideKeyboard(element) {
+      element.attr('readonly', 'readonly'); // Force keyboard to hide on input field.
+      element.attr('disabled', 'true'); // Force keyboard to hide on textarea field.
+      setTimeout(function() {
+          element.blur();  //actually close the keyboard
+          // Remove readonly attribute after keyboard is hidden.
+          element.removeAttr('readonly');
+          element.removeAttr('disabled');
+      }, 100);
+  }
 
 
 
-  $('#scrims_chat_send').on('click',function(){
-      SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
+  $('#scrims_chat_send').on('click',function(e){
+
+      if(width_window<700){
+          e.preventDefault();
+          $('#scrims_chat_textarea').focus();
+          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val() )
+      }else{
+        SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
+      }
+
+
   })
 
  //ctr+enter send message
   $('#scrims_chat_textarea').bind('keypress', function(event) {
       if((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
         SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val() )
+
       }
   });
 
@@ -530,29 +662,8 @@ socket.on('msg readed',data=>MSG_READED(data))
     }
     $('#scrims_chat_contact_list').empty()
 
-    $.each(users,function(k,v){
-        $('#scrims_chat_contact_list').append(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}">
-                <!--<span class="scrims_chat_status scrims_chat_status_offline"></span>-->
-                <span class="scrims_chat_status"></span>
-                <div class="col-sm-2 col-xs-2 sideBar-avatar">
-                  <div class="avatar-icon">
-                      <img src="${v.img}" width="50" height="50">
-                  </div>
-                </div>
-                <div class="col-sm-9 col-xs-9 sideBar-main">
-                  <div class="row">
-                    <div class="col-sm-8 col-xs-8 sideBar-name">
-                      <span class="name-meta">${v.name}
-                    </span>
-                    </div>
-                    <div class="col-sm-3 col-xs-3 pull-right sideBar-time">
-                      <span class="time-meta pull-right">
-                    </span>
-                    </div>
-                  </div>
-                </div>
-              </div>`)
-    })
+
+    RENDER_USERS(users)
 
     SELECT_COMPANION_ACTION()
 
