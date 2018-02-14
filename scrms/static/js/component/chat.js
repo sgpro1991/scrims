@@ -21,7 +21,7 @@ console.log(s1)
 console.log(s2)
 */
 
-function CHAT(USER_ID,KEY,USERS,socket,csrf_token,noty){
+function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty){
 
 
 
@@ -166,7 +166,7 @@ RENDER_USERS(USERS)
       var body = `<div style='text-align:center'><a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='width:80px' src='/static/img/file.png'/><br></a><span>${jsn.name}</span></div>`
     }
 
-    SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body)
+    SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body,USER_IMG)
 
     setTimeout(function(){
       $('.previewsContainer').empty()
@@ -274,7 +274,7 @@ RENDER_USERS(USERS)
 
   function PARSER_MSG_HISTORY(id,result){
 
-            var messages_read = []
+    var messages_read = []
 
 
 
@@ -284,9 +284,13 @@ RENDER_USERS(USERS)
           messages_read.push(v.id) // статус прочитанных сообщений
           var cls_mess = 'receiver'
           var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
+          var img = '<img src="'+v.img+'" style="width:40px;height:40px;border-radius:50%;position:absolute;left:-65px;top: -40px;"/>'
+
         }else {
           var cls_mess = 'sender'
           var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+          var img = '<img src="'+v.img+'" style="width:40px;height:40px;border-radius:50%;position:absolute;right:-65px;top: -40px;"/>'
+
         }
 
         let date = moment(v.date).calendar()
@@ -314,6 +318,7 @@ RENDER_USERS(USERS)
 
         $('#scrims_chat_canvas').prepend(`<div id="id_msg_${v.id}" class="row message-body scrims_chat_msg_${v.message}"  data-init="${v.id}" style="display:none">
             <div class="col-sm-12 message-main-${cls_mess}">
+
               <div class="${cls_mess}">
                 <div class="message-text">
                   ${decrypt}
@@ -323,8 +328,13 @@ RENDER_USERS(USERS)
                   ${check}
                   ${read}
                 </span>
+                <div class="col-sm-12">
+                ${img}
+                </div>
               </div>
+
             </div>
+
           </div>`)
     })
 
@@ -397,7 +407,7 @@ RENDER_USERS(USERS)
 
 
 
-function SEND_MESSAGE(id_user,id_companion,type,message){
+function SEND_MESSAGE(id_user,id_companion,type,message,img){
 
 
   let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
@@ -416,7 +426,7 @@ function SEND_MESSAGE(id_user,id_companion,type,message){
   console.log(crypt_msg,"------crypt-------",decrypt)
 
   let date = moment().format('YYYY-MM-DD HH:mm:ss')
-  let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":crypt_msg,"date":date,"csrfmiddlewaretoken":csrf_token}
+  let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":crypt_msg,"date":date,"csrfmiddlewaretoken":csrf_token,"img":img}
 
   if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
   SCROLL_TO_BOTTOM()
@@ -501,6 +511,9 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
                   <span class="message-time pull-right">
                     ${moment().calendar()}
                   </span>
+                  <div class="col-sm-12">
+                  <img src="${data.img}" style="width:40px;height:40px;border-radius:50%;position:absolute;left:-65px;top: -40px;">
+                  </div>
                 </div>
               </div>
             </div>`)
@@ -523,10 +536,15 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
                   ${decrypt}
                 </div>
                 <span class="message-time pull-right">
+
+
                   ${moment().calendar()}
                   <span class="fa fa-check delivered_msg"></span>
                   <span class="fa fa-check reading_msg"></span>
                 </span>
+                <div class="col-sm-12">
+                <img src="${data.img}" style="width:40px;height:40px;border-radius:50%;position:absolute;right:-65px;top: -40px;">
+                </div>
               </div>
             </div>
           </div>`)
@@ -626,22 +644,20 @@ socket.on('msg readed',data=>MSG_READED(data))
 
 
   $('#scrims_chat_send').on('click',function(e){
-
+      var img = $('#scrims_chat_init').find('img').attr('src')
       if(width_window<700){
           e.preventDefault();
           $('#scrims_chat_textarea').focus();
-          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val() )
+          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG)
       }else{
-        SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val())
+        SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val(),USER_IMG)
       }
-
-
   })
 
  //ctr+enter send message
   $('#scrims_chat_textarea').bind('keypress', function(event) {
       if((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
-        SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val() )
+        SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG )
 
       }
   });

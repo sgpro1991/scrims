@@ -53,7 +53,7 @@ def SendMessage(request):
                              delivered=True)
             insert.save()
             last_msg(insert,user,companion,type_msg)
-            return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+escape_string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
+            return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+escape_string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'","img":"'+im.url+'"}')
 
 
 

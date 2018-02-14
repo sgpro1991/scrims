@@ -902,6 +902,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      font-size: 5px;
      word-wrap: break-word;
      display: inline-block;
+     margin: 0 0px 0 45px;
    }
 
 .cleanstate_chat_companion{
@@ -918,6 +919,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      font-size: 12px;
      display: inline-block;
      word-wrap: break-word;
+     margin: 0 45px 0px 0px;
    }
 
 .reading_msg, .delivered_msg{
