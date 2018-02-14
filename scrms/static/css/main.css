@@ -664,7 +664,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
    .sideBar-body {
      position: relative;
      padding: 10px !important;
-     border-bottom: 1px solid #f7f7f7;
+     border-bottom: 1px solid #e8e8e8;
      height: 72px;
      margin: 0 !important;
      cursor: pointer;
@@ -704,7 +704,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      text-align: left;
      text-overflow: ellipsis;
      white-space: nowrap;
-     color: #000;
+     color: #3b3b3b;
    }
 
    .sideBar-time {
@@ -1021,9 +1021,9 @@ box-shadow: 0 0px 0px 2px #4ecb54;
 
    @media screen and (max-width: 700px) {
 
-     .message-main-receiver {
-         max-width: 75%;
-     }
+ .message-main-receiver {
+     max-width: 75%;
+ }
 
 .message-main-sender {
     padding: 3px 20px !important;

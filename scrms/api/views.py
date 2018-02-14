@@ -8,7 +8,7 @@ from django.db.models import Q
 # Create your views here.
 from django.utils.html import strip_tags
 from bs4 import BeautifulSoup
-
+from sorl.thumbnail import get_thumbnail
 import html
 
 crypto = Crypto()
@@ -39,23 +39,36 @@ def SendMessage(request):
             else:
                 last_msg.update(text=request.POST.get('body',False),type_msg=type_msg,id_msg=insert.id)
 
-
+        im = get_thumbnail(user.image,"50x50", crop="center")
 
         if type_msg == "text":
             escape_string = html.escape(request.POST.get('body',False)).replace("&lt;br&gt;","<br>")
             #body = crypto.Encrypt(escape_string)
             body = escape_string
-            insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
+            insert = Message(user=user,
+                             companion=companion,
+                             text=body,type_msg='1',
+                             date=date,
+                             img = im.url,
+                             delivered=True)
             insert.save()
             last_msg(insert,user,companion,type_msg)
             return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+escape_string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
+
+
 
         if type_msg == "file":
             string = request.POST.get('body',False)
             #body = crypto.Encrypt(string)
 
             body = string
-            insert = Message(user=user,companion=companion,text=body,type_msg='1',date=date,delivered=True)
+            insert = Message(user=user,
+                             companion=companion,
+                             text=body,
+                             type_msg='1',
+                             date=date,
+                             img=im.url,
+                             delivered=True)
             insert.save()
             last_msg(insert,user,companion,type_msg)
             return HttpResponse('{"user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'"}')
@@ -72,7 +85,9 @@ def GetStatus(request,id_user):
     if CheckAuth(request) == False:
         return HttpResponse(status=403)
     if id_user:
-        user = User.objects.get(id=id_user)
+        if id_user == 'all':
+            return HttpResponse('{"status":1}')
+        user = User.objects.get(id=int(id_user))
         if user:
             return HttpResponse('{"status":'+str(int(user.status))+'}')
 
@@ -158,6 +173,7 @@ def GetHistoryAbout(request):
             'id':a.id,
             'user':a.user.id,
             'body':body,
+            'img':a.img,
             'companion':a.companion,
             'message':message,
             'date':str(a.date),
@@ -226,6 +242,7 @@ def GetHistory(request):
             'id':a.id,
             'user':a.user.id,
             'body':body,
+            'img':a.img,
             'companion':a.companion,
             'message':message,
             'date':str(a.date),

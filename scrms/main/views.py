@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from scrms.settings import BASE_DIR,LANG,MEDIA_ROOT,MEDIA_URL
-from users.models import User,Storage,Message,LastMessage
+from users.models import User,Storage,Message,LastMessage,Group
 from django.utils.crypto import get_random_string
 import os
 import json
@@ -242,13 +242,19 @@ def Main(request):
     user_data = User.objects.get(pk=user[0]['id'])
     users = User.objects.all().exclude(pk=user[0]['id']).order_by('-status')
 
+
+    ids = []
+    for i in user_data.group.all():
+        ids.append(i.id)
+    group = Group.objects.filter(pk__in=ids)
     user_mass = []
+
+
     for a in users:
         count = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False).count()
         last_message = LastMessage.objects.filter(companion_1=int(a.id),companion_2=int(user[0]['id'])) | LastMessage.objects.filter(companion_1=int(user[0]['id']),companion_2=int(a.id))
-
-
         user_mass.append({
+            "group":group,
             "search":a.name.split(" "),
             "id":a.id,
             "name":a.name,
@@ -260,5 +266,5 @@ def Main(request):
         })
 
     #print(user_mass)
-    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})
+    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':str(LANG),"group":group})
     #return render(request,"react/react-home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})

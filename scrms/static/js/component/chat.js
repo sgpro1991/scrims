@@ -66,7 +66,7 @@ function RENDER_USERS_ITEM(v,arg){
 
   if(arg === true){
 
-    $('#scrims_chat_contact_list').append(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}">
+    $('#scrims_chat_contact_list').append(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}" data-group="${v.group}">
         <div class="col-sm-2 col-xs-2 sideBar-avatar">
           ${status}
             <img src="${v.img}" width="50px" height="50px">
@@ -87,7 +87,7 @@ function RENDER_USERS_ITEM(v,arg){
         </div>
       </div>`)
   }else{
-    $('#scrims_chat_contact_list').prepend(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}">
+    $('#scrims_chat_contact_list').prepend(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}" data-type="${v.group}">
         <div class="col-sm-2 col-xs-2 sideBar-avatar">
           ${status}
             <img src="${v.img}" width="50px" height="50px">
@@ -179,9 +179,15 @@ RENDER_USERS(USERS)
     $('.previewsContainer').fadeIn(10)
   });
 
+  function SELECT_GROUP(){
+  alert(1)
+  }
 
+  function SELECT_COMPANION(id,group){
 
-  function SELECT_COMPANION(id){
+      if(group == 'true'){
+        return SELECT_GROUP(id)
+      }
 
       MAIN_AJAX_GET('/api/get-status/'+id+'/').then(function(result){
         if(result.status == true){
@@ -196,12 +202,11 @@ RENDER_USERS(USERS)
           $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-2 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key}>
                 <div class="heading-avatar-icon">
                   <img src="${user[0].img}">
-                </div>
-                </div>
-              <div class="col-sm-4 col-xs-7 heading-name">
-                <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
-
-               </a>
+                  </div>
+                  </div>
+                  <div class="col-sm-4 col-xs-7 heading-name">
+                  <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
+                </a>
 
               </div>
               <div class="col-sm-1 col-xs-1 heading-name">
@@ -393,6 +398,7 @@ RENDER_USERS(USERS)
 
 
 function SEND_MESSAGE(id_user,id_companion,type,message){
+
 
   let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
   if(msg === ''){return false}
@@ -649,6 +655,9 @@ socket.on('msg readed',data=>MSG_READED(data))
       $('.scrims_chat_companion:first').click()
     }
 
+    users_ = USERS.filter(a => a.group == false)
+    groups_ = USERS.filter(a => a.group == true)
+
     var data = $(this).val()
     function filtration(text){
       var a = text.slice(0,data.length)
@@ -656,15 +665,17 @@ socket.on('msg readed',data=>MSG_READED(data))
     }
 
 
-    var users = USERS.filter(a => filtration(a.search[0]) == data.toLowerCase() || filtration(a.search[1]) == data.toLowerCase() || filtration(a.search[2]) == data.toLowerCase())
+    var users = users_.filter(a => filtration(a.search[0]) == data.toLowerCase() || filtration(a.search[1]) == data.toLowerCase() || filtration(a.search[2]) == data.toLowerCase())
     if(users == ''){
-      var users = USERS.filter(a => filtration(a.name) == data.toLowerCase())
+      var users = users_.filter(a => filtration(a.name) == data.toLowerCase())
     }
+      var groups = groups_.filter(a => filtration(a.search[0]) == data.toLowerCase())
+
     $('#scrims_chat_contact_list').empty()
 
 
     RENDER_USERS(users)
-
+    RENDER_USERS(groups)
     SELECT_COMPANION_ACTION()
 
   })
@@ -680,7 +691,7 @@ socket.on('msg readed',data=>MSG_READED(data))
     $('.scrims_chat_companion').removeClass('cleanstate_chat_companion')
     $(this).addClass('cleanstate_chat_companion');
 
-    SELECT_COMPANION($(this).attr('data-init'))
+    SELECT_COMPANION($(this).attr('data-init'),$(this).attr('data-group'))
 
 
     if(width_window<700){
