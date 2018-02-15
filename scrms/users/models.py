@@ -34,8 +34,11 @@ class User(models.Model):
 
 
 
-#class Storage(models.Model):
-    #user = models.ForeignKey(User,on_delete=models.CASCADE)
+
+class Membership(models.Model):
+    group = models.ForeignKey(Group,on_delete=models.CASCADE,null=True,blank=True)
+    users = models.ManyToManyField(User,blank=True)
+
 
 
 

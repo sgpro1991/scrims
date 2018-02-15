@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from scrms.settings import BASE_DIR,LANG,MEDIA_ROOT,MEDIA_URL
-from users.models import User,Storage,Message,LastMessage,Group
+from users.models import User,Storage,Message,LastMessage,Group,Membership
 from django.utils.crypto import get_random_string
 import os
 import json
@@ -246,9 +246,10 @@ def Main(request):
     ids = []
     for i in user_data.group.all():
         ids.append(i.id)
-    group = Group.objects.filter(pk__in=ids)
-    user_mass = []
 
+    group = Group.objects.filter(pk__in=ids)
+
+    user_mass = []
 
     for a in users:
         count = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False).count()

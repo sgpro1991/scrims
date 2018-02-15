@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Message, Storage, LastMessage, Group
+from .models import User, Message, Storage, LastMessage, Group, Membership
 from main.views import Crypto
 from django.utils.crypto import get_random_string
 from sorl.thumbnail import get_thumbnail
@@ -37,6 +37,7 @@ class UserAdmin(admin.ModelAdmin):
             User.objects.filter(id=obj.id).update(password=crypt,hash_password=hash_sha256.hexdigest(),about=password,public_key_user=publick_key)
 
 
+admin.site.register(Membership)
 admin.site.register(LastMessage)
 admin.site.register(Message)
 admin.site.register(Storage)

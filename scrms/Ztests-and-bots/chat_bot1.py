@@ -9,8 +9,8 @@ def id_generator(size=randint(3, 5), chars=string.ascii_uppercase + string.digit
 
 
 
-user = 'mail3@mail.ru'
-user_pass = '393YrpAgba4'
+user = 'ZAM@mail.ru'
+user_pass = 'OHAeUlaZ2tt'
 
 driver = webdriver.Chrome('./chromedriver')
 driver.get("http://127.0.0.1:9898")

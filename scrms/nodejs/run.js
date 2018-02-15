@@ -61,13 +61,13 @@ io.on('connection', function(socket){
 
 
     socket.on('msg delivered', function(msg){
-      console.log(msg)
+      //console.log(msg)
       io.emit('msg delivered', msg);
     });
 
 
     socket.on('msg readed', function(msg){
-      console.log(msg,"======= readed ")
+      //console.log(msg,"======= readed ")
       io.emit('msg readed', msg);
     });
 

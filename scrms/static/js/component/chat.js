@@ -114,11 +114,23 @@ function RENDER_USERS_ITEM(v,arg){
 
 
 
+
+
+
+
+
+
+
+
+
 function RENDER_USERS(USERS){
 
   var mass = []
 
   $.each(USERS,function(k,v){
+
+    //if(k>10){return false}
+
     if(v.count_msg != 0){
       mass.push(v)
     }else{
@@ -134,12 +146,28 @@ function RENDER_USERS(USERS){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 RENDER_USERS(USERS)
-
-
-
-
-
   var width_window = $(window).width()
   Dropzone.autoDiscover = false;
   var myDropzone = new Dropzone("#dropzone-chat",);
@@ -166,7 +194,15 @@ RENDER_USERS(USERS)
       var body = `<div style='text-align:center'><a href='${jsn.url}' target='blank'><img class='scrims_chat_message_file img_types' style='width:80px' src='/static/img/file.png'/><br></a><span>${jsn.name}</span></div>`
     }
 
-    SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body,USER_IMG)
+    if($('#scrims_chat_init').attr('data-group') == 'true'){
+        var group = true
+    }else{
+        var group = false
+    }
+
+
+
+    SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body, USER_IMG,group)
 
     setTimeout(function(){
       $('.previewsContainer').empty()
@@ -175,20 +211,92 @@ RENDER_USERS(USERS)
 
   });
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
   myDropzone.on("addedfile", function(data) {
     $('.previewsContainer').fadeIn(10)
   });
 
-  function SELECT_GROUP(){
-  alert(1)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function SELECT_GROUP(id){
+      MAIN_AJAX_GET('/api/get-users-group/'+id+'/').then(function(result){
+
+        $('#scrims_chat_heading').empty()
+        var users  = []
+        $.each(result,function(k,v){
+            let user = USERS.filter(data => data.id==v)
+            users.push(user)
+        })
+
+        $('#scrims_chat_canvas').attr('data-init',id)
+
+        $('#scrims_chat_heading').append(`<div id="scrims_chat_init" class="col-sm-10 col-md-10 col-xs-10 heading-avatar" style="position:absolute;overflow: top:0;hidden;height: 50px;" data-init="${id}" data-public-key="123" data-group="true"></div>`)
+
+        $.each(users,function(k,v){
+          console.log(v)
+            $('#scrims_chat_init').append(`<div  class="col-sm-1 col-md-1 col-xs-1 scrims_chat_companion heading-avatar " data-init="${id}" data-group="false">
+                  <div class="heading-avatar-icon">
+                    <a href="/personal/user/${v[0].id}/" class="heading-name-meta" style="text-align:center"><img src="${v[0].img}"></a>
+                    </div>
+                  </div>
+            `)
+        })
+      GET_HISTORY(id,true)
+      })
   }
 
-  function SELECT_COMPANION(id,group){
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  function SELECT_COMPANION(id,group){
       if(group == 'true'){
         return SELECT_GROUP(id)
       }
-
       MAIN_AJAX_GET('/api/get-status/'+id+'/').then(function(result){
         if(result.status == true){
             var status = '<span  class="scrims_chat_status scrims_chat_status_online"></span>'
@@ -199,13 +307,13 @@ RENDER_USERS(USERS)
           let user = USERS.filter(data => data.id==id)
           $('#scrims_chat_canvas').attr("data-init",id)
           $('#scrims_chat_heading').empty()
-          $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-2 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key}>
+          $('#scrims_chat_heading').html(`<div id="scrims_chat_init" class="col-sm-2 col-md-1 col-xs-2 heading-avatar" data-init="${user[0].id}" data-public-key=${user[0].public_key} data-group="false">
                 <div class="heading-avatar-icon">
                   <img src="${user[0].img}">
                   </div>
                   </div>
                   <div class="col-sm-4 col-xs-7 heading-name">
-                  <a href="/personal/user/2/${user[0].id}" class="heading-name-meta">${user[0].name}
+                  <a href="/personal/user/${user[0].id}/" class="heading-name-meta">${user[0].name}
                 </a>
 
               </div>
@@ -213,7 +321,7 @@ RENDER_USERS(USERS)
               ${status}
               </div>
               `)
-            GET_HISTORY(id)
+            GET_HISTORY(id,false)
             if(width_window>700){
                   $('#scrims_chat_textarea').focus()
             }
@@ -223,67 +331,77 @@ RENDER_USERS(USERS)
 
 
 
-  function PREVIOUS_MESSAGE(id){
+function PREVIOUS_MESSAGE(id,group){
 
-    var limit = ($('.scrims_chat_msg_main').length)+($('.scrims_chat_msg_recive').length)
 
-    MAIN_AJAX_GET('/api/get-history-about/?companion='+id+'&limit='+limit).then(function(result){
 
-      $('.message-previous').remove()
+      var limit = ($('.scrims_chat_msg_main').length)+($('.scrims_chat_msg_recive').length)
 
-      PARSER_MSG_HISTORY(id,result)
+      if($('#scrims_chat_init').attr('data-group') == 'true'){
+        var group = 1
+      }else{
+        var group = 0
+      }
 
-    })
+      MAIN_AJAX_GET('/api/get-history-about/?companion='+id+'&group='+group+'&limit='+limit).then(function(result){
+
+        $('.message-previous').remove()
+
+        PARSER_MSG_HISTORY(id,result,group)
+
+      })
+
+}
+
+
+
+  function GET_HISTORY(id,group){
+    if(group==true){
+      var group = 1
+    }else{
+      var group = 0
+    }
+
+    MAIN_AJAX_GET('/api/get-history/?companion='+id+'&group='+group).then(function(result){
+            $('#scrims_chat_canvas').empty()
+            PARSER_MSG_HISTORY(id,result,group)
+            $('#scrims_chat_textarea').val('')
+            setTimeout(function(){
+                    $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
+            },10)
+
+            $('.scrims_chat_companion').each(function() {
+              if($(this).attr('data-init') == id){
+                var count = parseInt($(this).find('.scrims_chat_count_message').remove())
+              }
+            })
+        })
 
   }
 
 
 
-  function GET_HISTORY(id){
-
-              MAIN_AJAX_GET('/api/get-history/?companion='+id).then(function(result){
-
-                  $('#scrims_chat_canvas').empty()
-                  PARSER_MSG_HISTORY(id,result)
-                  $('#scrims_chat_textarea').val('')
-                  setTimeout(function(){
-                          $('#scrims_chat_canvas').scrollTop($('#scrims_chat_canvas').prop('scrollHeight'))
-                  },10)
-
-                  $('.scrims_chat_companion').each(function() {
-
-                    if($(this).attr('data-init') == id){
-                      //var count = parseInt($('.scrims_chat_count_message').text())
-
-                      var count = parseInt($(this).find('.scrims_chat_count_message').remove())
-
-                    }
-                  })
-
-
-              })
-  }
 
 
 
 
 
 
-
-
-
-  function PARSER_MSG_HISTORY(id,result){
+  function PARSER_MSG_HISTORY(id,result,group){
 
     var messages_read = []
-
-
 
     $.each(result.reverse(),function(k,v){
 
         if(v.message=='recive'){
           messages_read.push(v.id) // статус прочитанных сообщений
           var cls_mess = 'receiver'
-          var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
+            if(group == 1){
+              var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+            }else{
+              var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
+            }
+          //var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
           var img = '<img src="'+v.img+'" style="width:40px;height:40px;border-radius:50%;position:absolute;left:-65px;top: -40px;"/>'
 
         }else {
@@ -357,7 +475,7 @@ RENDER_USERS(USERS)
 
       $('.message-body').fadeIn('slow')
 
-      $('.message-previous').click(a => PREVIOUS_MESSAGE(id))
+      $('.message-previous').click(a => PREVIOUS_MESSAGE(id,group))
   }
 
 
@@ -376,11 +494,12 @@ RENDER_USERS(USERS)
 
 
 
-  function SEND_AJAX_MESSAGE(msg_object){
+  function SEND_AJAX_MESSAGE(msg_object,group){
 
+    var url = '/api/send-message/?group='+group
     if(isNaN(msg_object.companion) == true){return false}//if not found recipient
     let data = $.ajax({
-      url:'/api/send-message/',
+      url:url,
       type:'POST',
       dataType:"json",
       data:msg_object,
@@ -407,8 +526,9 @@ RENDER_USERS(USERS)
 
 
 
-function SEND_MESSAGE(id_user,id_companion,type,message,img){
+function SEND_MESSAGE(id_user,id_companion,type,message,img,group){
 
+  console.log(id_companion)
 
   let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
   if(msg === ''){return false}
@@ -428,7 +548,7 @@ function SEND_MESSAGE(id_user,id_companion,type,message,img){
   let date = moment().format('YYYY-MM-DD HH:mm:ss')
   let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":crypt_msg,"date":date,"csrfmiddlewaretoken":csrf_token,"img":img}
 
-  if (SEND_AJAX_MESSAGE(msg_object)==false){return false}
+  if (SEND_AJAX_MESSAGE(msg_object,Number(group))==false){return false}
   SCROLL_TO_BOTTOM()
   $('#scrims_chat_textarea').val('')
 
@@ -492,83 +612,142 @@ function READED_MSG(id_msg){
 }
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
+///// GROUPS
+  if(data.group != ''){
+
+      //Парсим сообщение группы которое пришло нам т.е. reciver
+      if(data.companion.indexOf(USER_ID)!=-1){
+        if(parseInt($('#scrims_chat_canvas').attr('data-init')) === parseInt(data.group)){
+
+          let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+          PARSER_WEBSOKET_MESSAGE(data,decrypt,'receiver')
+          $('.heading-typing').fadeOut(200)
+          SCROLL_TO_BOTTOM()
+          READED_MSG(data.id_msg)
+
+        }
+      }else if(USER_ID === data.user ){
+        let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+        PARSER_WEBSOKET_MESSAGE(data,decrypt,'sender')
+        SCROLL_TO_BOTTOM()
+      }
+
+      MESSAGE_NO_SEE(data,true)
+      return false
+  }
 
 
-
+///// couple
   // Парсим сообщение которое пришло нам т.е. reciver
   if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
 
     let decrypt = CryptoJS.AES.decrypt(data.body,KEY).toString(CryptoJS.enc.Utf8);
-
-
-    $('#scrims_chat_canvas').append(`<div id="id_msg_${data.id_msg}" class="row message-body scrims_chat_msg_receiver" data-init="${data.id_msg}">
-              <div class="col-sm-12 message-main-receiver">
-                <div class="receiver">
-                  <div class="message-text">
-                    ${decrypt}
-                  </div>
-                  <span class="message-time pull-right">
-                    ${moment().calendar()}
-                  </span>
-                  <div class="col-sm-12">
-                  <img src="${data.img}" style="width:40px;height:40px;border-radius:50%;position:absolute;left:-65px;top: -40px;">
-                  </div>
-                </div>
-              </div>
-            </div>`)
-          $('.heading-typing').fadeOut(200)
-
-          SCROLL_TO_BOTTOM()
-          READED_MSG(data.id_msg)
-
+        PARSER_WEBSOKET_MESSAGE(data,decrypt,'receiver')
+        $('.heading-typing').fadeOut(200)
+        SCROLL_TO_BOTTOM()
+        READED_MSG(data.id_msg)
 
   }  // Парсим сообщение которое мы отправили
   else if(data.user === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.companion){
 
-
         let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
-
-        $('#scrims_chat_canvas').append(`<div id="id_msg_${data.id_msg}" class="row message-body scrims_chat_msg_main" data-init="${data.id_msg}">
-            <div class="col-sm-12 message-main-sender">
-              <div class="sender">
-                <div class="message-text">
-                  ${decrypt}
-                </div>
-                <span class="message-time pull-right">
-
-
-                  ${moment().calendar()}
-                  <span class="fa fa-check delivered_msg"></span>
-                  <span class="fa fa-check reading_msg"></span>
-                </span>
-                <div class="col-sm-12">
-                <img src="${data.img}" style="width:40px;height:40px;border-radius:50%;position:absolute;right:-65px;top: -40px;">
-                </div>
-              </div>
-            </div>
-          </div>`)
-
+        PARSER_WEBSOKET_MESSAGE(data,decrypt,'sender')
         SCROLL_TO_BOTTOM()
 
    }
+   MESSAGE_NO_SEE(data,false)
+}
 
 
-   MESSAGE_NO_SEE(data)
+
+function PARSER_WEBSOKET_MESSAGE(data,decrypt,type){
+
+  if(type == 'receiver'){
+      var position = 'left'
+      var galki =''
+  }else{
+    var position = 'right'
+    var galki = `<span class="fa fa-check delivered_msg"></span><span class="fa fa-check reading_msg"></span>`
+  }
+
+  $('#scrims_chat_canvas').append(`<div id="id_msg_${data.id_msg}" class="row message-body scrims_chat_msg_${type}" data-init="${data.id_msg}">
+          <div class="col-sm-12 message-main-${type}">
+            <div class="${type}">
+              <div class="message-text">
+                ${decrypt}
+              </div>
+              <span class="message-time pull-right">
+                ${moment().calendar()}
+                ${galki}
+              </span>
+              <div class="col-sm-12">
+              <img src="${data.img}" style="width:40px;height:40px;border-radius:50%;position:absolute;${position}:-65px;top: -40px;">
+              </div>
+            </div>
+          </div>
+      </div>`)
 
 }
 
 
 
 // if user not see recive message while no open contact or close chat
-function MESSAGE_NO_SEE(data){
+function MESSAGE_NO_SEE(data,group){
+
+  //if group
+if(group == true){
+  if (data.companion.indexOf(USER_ID)!=-1 && parseInt($('#scrims_chat_init').attr('data-init')) != data.group){
+    $('.scrims_chat_companion').each(function() {
+      if($(this).attr('data-init') == data.group){
+        //var count = parseInt($('.scrims_chat_count_message').text())
+        var count = parseInt($(this).find('.scrims_chat_count_message').text())
+        if(isNaN(count)==true){
+          $(this).find(".pull-right").html('<div  class="badge scrims_chat_count_message shake-'+data.group+'">1</div>')
+        }else{
+          $(this).find(".pull-right").html('<div  class="badge scrims_chat_count_message shake-'+data.group+'">'+(count+1)+'</div>')
+
+        }
+        user = USERS.filter(a => a.id==parseInt(data.group))
+        noty(user[0].name, user[0].img, 'Отправил(а) вам') //-----------------------------------> lang
+
+        $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion" data-init="'+data.group+'" data-group="true">'+$(this).html())
+        $(this).remove()
+        $('.shake-'+data.group).effect('shake', { times:3 }, 300);
+
+      }
+    })
+    }
+  }
+
+    //if couple
   if (data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) != data.user) {
         $('.scrims_chat_companion').each(function() {
 
           if($(this).attr('data-init') == data.user){
-
-
-
             //var count = parseInt($('.scrims_chat_count_message').text())
             var count = parseInt($(this).find('.scrims_chat_count_message').text())
             if(isNaN(count)==true){
@@ -580,15 +759,13 @@ function MESSAGE_NO_SEE(data){
             user = USERS.filter(a => a.id==parseInt(data.user))
             noty(user[0].name, user[0].img, 'Отправил(а) вам') //-----------------------------------> lang
 
-
-
-            $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion" data-init="'+data.user+'">'+$(this).html())
+            $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion" data-init="'+data.user+'" data-group="false">'+$(this).html())
             $(this).remove()
             $('.shake-'+data.user).effect('shake', { times:3 }, 300);
 
           }
         })
-    }
+  }
 
 }
 
@@ -645,19 +822,35 @@ socket.on('msg readed',data=>MSG_READED(data))
 
   $('#scrims_chat_send').on('click',function(e){
       var img = $('#scrims_chat_init').find('img').attr('src')
+
+      if($('#scrims_chat_init').attr('data-group') == 'true'){
+          var group = true
+      }else{
+          var group = false
+      }
+
       if(width_window<700){
           e.preventDefault();
           $('#scrims_chat_textarea').focus();
-          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG)
+          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
       }else{
-        SEND_MESSAGE(USER_ID,parseInt($('#scrims_chat_init').attr('data-init')),'text',$('#scrims_chat_textarea').val(),USER_IMG)
+          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
       }
   })
 
  //ctr+enter send message
   $('#scrims_chat_textarea').bind('keypress', function(event) {
       if((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
-        SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG )
+
+        if($('#scrims_chat_init').attr('data-group') == 'true'){
+            var group = true
+        }else{
+            var group = false
+        }
+        var companion = parseInt($('#scrims_chat_init').attr('data-init'))
+
+
+        SEND_MESSAGE( USER_ID, companion,'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
 
       }
   });

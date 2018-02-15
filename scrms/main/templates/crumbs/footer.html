@@ -103,6 +103,7 @@ const USERS = [{% for item in users  %}
                   "public_key":"{{item.public_key_user}}",
                   "last_msg":"{{item.last_msg.0.text}}",
                   "group":true,
+                  "users":[{{item.users_group}}],
                   "last_msg_type":"{{item.last_msg.0.type_msg}}",
                   "status":true,
                 },
