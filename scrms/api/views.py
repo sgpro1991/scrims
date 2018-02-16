@@ -19,12 +19,13 @@ def SendMessage(request):
     if auth_user == False:
         return HttpResponse(status=403)
 
-    user = User.objects.get(pk=CheckAuth(request)[0]['id'])
+    user = User.objects.get(init=CheckAuth(request)[0]['id'])
     companion = request.POST.get('companion',False)
     type_msg = request.POST.get('type',False)
     date = request.POST.get('date',False)
 
 
+    print(companion)
 
     if companion and type_msg and date:
         if companion == "NaN":
@@ -47,31 +48,42 @@ def SendMessage(request):
             #body = crypto.Encrypt(escape_string)
             body = escape_string
             if request.GET.get('group',False) == '1':
-                group = Group.objects.get(pk=companion)
-                users = Membership.objects.get(group=group.id)
+                group = Group.objects.get(init=companion)
+                users = Membership.objects.get(group=group.init)
                 users_mass = []
                 for i in users.users.all():
-                    if int(i.id) != int(auth_user[0]['id']):
-                        users_mass.append(i.id)
-                insert = Message(group=group,
-                                 user=user,
-                                 text=body,type_msg='1',
+                    if i.init != auth_user[0]['id']:
+                        users_mass.append(i.init)
+
+                insert = Message(group=group.init,
+                                 user=user.init,
+                                 text=body,
+                                 type_msg='1',
                                  date=date,
                                  img = im.url,
                                  delivered=True)
                 companion = users_mass
-                group = group.id
+                group = group.init
             else:
-                insert = Message(user=user,
+                insert = Message(user=user.init,
                                  companion=companion,
-                                 text=body,type_msg='1',
+                                 text=body,
+                                 type_msg='1',
                                  date=date,
                                  img = im.url,
                                  delivered=True)
                 group = ''
             insert.save()
             #last_msg(insert,user,companion,type_msg)
-            return HttpResponse('{"group":"'+str(group)+'","user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+escape_string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'","img":"'+im.url+'"}')
+            json_resp = {"group":str(group),
+                    "user":str(user.init),
+                    "companion":str(companion),
+                    "body":escape_string,
+                    "date":date,
+                    "type":type_msg,
+                    "id_msg":str(insert.id),"img":im.url
+                    }
+            return HttpResponse(json.dumps(json_resp))
 
 
 
@@ -111,8 +123,6 @@ def SendMessage(request):
             #last_msg(insert,user,companion,type_msg)
             return HttpResponse('{"group":"'+str(group)+'","user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'","img":"'+im.url+'"}')
 
-
-
     else:
         return HttpResponse(status=404)
 
@@ -125,7 +135,7 @@ def GetStatus(request,id_user):
     if id_user:
         if id_user == 'all':
             return HttpResponse('{"status":1}')
-        user = User.objects.get(id=int(id_user))
+        user = User.objects.get(init=id_user)
         if user:
             return HttpResponse('{"status":'+str(int(user.status))+'}')
 
@@ -159,9 +169,9 @@ def SetStatus(request):
         f = open(BASE_DIR+'/sessions/'+token, encoding='utf-8')
         json_user = json.loads(crypto.Decrypt(f.read()))
         if status == 'on':
-            User.objects.filter(id=json_user[0]['id']).update(status=True)
+            User.objects.filter(init=json_user[0]['id']).update(status=True)
         if status == 'off':
-            User.objects.filter(id=json_user[0]['id']).update(status=False)
+            User.objects.filter(init=json_user[0]['id']).update(status=False)
         return HttpResponse(json_user[0]['id'])
     else:
         return HttpResponse(status=403)
@@ -170,7 +180,8 @@ def SetStatus(request):
 
 
 def GetHistoryAbout(request):
-    if CheckAuth(request) == False:
+    user_auth = CheckAuth(request)
+    if user_auth == False:
         return HttpResponse(status=403)
     else:
         pass
@@ -181,7 +192,7 @@ def GetHistoryAbout(request):
     group = request.GET.get('group',False)
 
     if int(group) == 1:
-        count = Message.objects.filter(group=int(companion)).count()
+        count = Message.objects.filter(group=companion).count()
         if (count-int(limit)-10) < 0:
             lim = 0
         else:
@@ -192,12 +203,12 @@ def GetHistoryAbout(request):
         else:
            lim2 = count-int(limit)
 
-        data = Message.objects.filter(group=int(companion)).order_by('date')[lim:lim2]
+        data = Message.objects.filter(group=companion).order_by('date')[lim:lim2]
         print(data)
-        return HttpResponse(json.dumps(AsembleHistory(data,companion,True,request)))
+        return HttpResponse(json.dumps(AsembleHistory(data,companion,True,request,user_auth)))
 
 
-    count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
+    count = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).count()
 
     if (count-int(limit)-10) < 0:
         lim = 0
@@ -209,8 +220,8 @@ def GetHistoryAbout(request):
     else:
        lim2 = count-int(limit)
 
-    data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[lim:lim2]
-    return HttpResponse(json.dumps(AsembleHistory(data,companion,False,request)))
+    data = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).order_by('date')[lim:lim2]
+    return HttpResponse(json.dumps(AsembleHistory(data,companion,False,request,user_auth)))
 
 
 
@@ -220,7 +231,8 @@ def GetHistoryAbout(request):
 
 #получить историю в чате
 def GetHistory(request):
-    if CheckAuth(request) == False:
+    user_auth = CheckAuth(request)
+    if user_auth == False:
         return HttpResponse(status=403)
     else:
         pass
@@ -231,31 +243,30 @@ def GetHistory(request):
 
 
     if int(group) == 1:
-        count = Message.objects.filter(group=int(companion)).count()
+        count = Message.objects.filter(group=companion).count()
         #not_read = Message.objects.filter(group=int(companion),reading=False)
         #if len(not_read)>0:
         if (count-10) <= 0:
-            data = Message.objects.filter(group=int(companion)).order_by('date')
+            data = Message.objects.filter(group=companion).order_by('date')
         else:
-            data = Message.objects.filter(group=int(companion)).order_by('date')[(count-10):count]
-        print(data)
-        return HttpResponse(json.dumps(AsembleHistory(data,companion,True,request)))
+            data = Message.objects.filter(group=companion).order_by('date')[(count-10):count]
+        return HttpResponse(json.dumps(AsembleHistory(data,companion,True,request,user_auth)))
 
 
 
     if companion == False:
         return HttpResponse(status=404)
 
-    count = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).count()
+    count = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).count()
     not_read = Message.objects.filter(user=companion,companion=user,reading=False)
 
 
 
     if len(not_read)>0:
         if (count-len(not_read)-10) <= 0:
-            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+            data = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).order_by('date')
         else:
-            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[(count-len(not_read)-10):count]
+            data = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).order_by('date')[(count-len(not_read)-10):count]
         mass = []
         print(count-len(not_read))
         for a in not_read:
@@ -265,29 +276,28 @@ def GetHistory(request):
 
     else:
         if count < 10:
-            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')
+            data = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).order_by('date')
         else:
-            data = Message.objects.filter(Q(user=int(companion),companion=user)|Q(user=user,companion=int(companion))).order_by('date')[(count-10):count]
+            data = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).order_by('date')[(count-10):count]
 
 
-    return HttpResponse(json.dumps(AsembleHistory(data,companion,False,request)))
-
-
-
+    return HttpResponse(json.dumps(AsembleHistory(data,companion,False,request,user_auth)))
 
 
 
-def AsembleHistory(data,companion,group,request):
 
+
+
+def AsembleHistory(data,companion,group,request,user_auth):
     mass = []
     for a in data:
         if group == False:
-            if int(a.companion) == int(companion):
+            if a.companion == companion:
                 message = 'main'
             else:
                 message = 'recive'
         else:
-            if int(a.user.id) == int(CheckAuth(request)[0]['id']):
+            if a.user == user_auth[0]['id']:
                 message = 'main'
             else:
                 message = 'recive'
@@ -296,7 +306,7 @@ def AsembleHistory(data,companion,group,request):
 
         mass.append({
             'id':a.id,
-            'user':a.user.id,
+            'user':a.user,
             'body':body,
             'img':a.img,
             'companion':a.companion,
@@ -324,14 +334,12 @@ def GetUsersGroup(request,id_group):
     if id_group == False:
         return HttpResponse(status=404)
 
-    users = Membership.objects.filter(group=int(id_group))
+    users = Membership.objects.filter(group=id_group)
 
     users_mass = []
     for a in users:
         for i in a.users.all():
-            if int(i.id) != int(user[0]['id']):
-                users_mass.append(i.id)
-
-
+            if i.init != user[0]['id']:
+                users_mass.append(i.init)
 
     return HttpResponse(json.dumps(users_mass))

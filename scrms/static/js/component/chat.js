@@ -202,7 +202,7 @@ RENDER_USERS(USERS)
 
 
 
-    SEND_MESSAGE(USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), "file", body, USER_IMG,group)
+    SEND_MESSAGE(USER_ID, $('#scrims_chat_init').attr('data-init'), "file", body, USER_IMG,group)
 
     setTimeout(function(){
       $('.previewsContainer').empty()
@@ -497,7 +497,8 @@ function PREVIOUS_MESSAGE(id,group){
   function SEND_AJAX_MESSAGE(msg_object,group){
 
     var url = '/api/send-message/?group='+group
-    if(isNaN(msg_object.companion) == true){return false}//if not found recipient
+    if(msg_object.companion == ''){return false}//if not found recipient
+
     let data = $.ajax({
       url:url,
       type:'POST',
@@ -513,6 +514,7 @@ function PREVIOUS_MESSAGE(id,group){
         }
       }
     })
+
     return data
 
   }
@@ -641,7 +643,7 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
       //Парсим сообщение группы которое пришло нам т.е. reciver
       if(data.companion.indexOf(USER_ID)!=-1){
-        if(parseInt($('#scrims_chat_canvas').attr('data-init')) === parseInt(data.group)){
+        if($('#scrims_chat_canvas').attr('data-init') === data.group){
 
           let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
           PARSER_WEBSOKET_MESSAGE(data,decrypt,'receiver')
@@ -663,7 +665,7 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
 ///// couple
   // Парсим сообщение которое пришло нам т.е. reciver
-  if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
+  if(data.companion === USER_ID && $('#scrims_chat_canvas').attr('data-init') === data.user){
 
     let decrypt = CryptoJS.AES.decrypt(data.body,KEY).toString(CryptoJS.enc.Utf8);
         PARSER_WEBSOKET_MESSAGE(data,decrypt,'receiver')
@@ -672,7 +674,7 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
         READED_MSG(data.id_msg)
 
   }  // Парсим сообщение которое мы отправили
-  else if(data.user === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.companion){
+  else if(data.user === USER_ID && $('#scrims_chat_canvas').attr('data-init') === data.companion){
 
         let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
         PARSER_WEBSOKET_MESSAGE(data,decrypt,'sender')
@@ -720,7 +722,10 @@ function MESSAGE_NO_SEE(data,group){
 
   //if group
 if(group == true){
-  if (data.companion.indexOf(USER_ID)!=-1 && parseInt($('#scrims_chat_init').attr('data-init')) != data.group){
+
+  console.log(data.companion.indexOf(USER_ID),'------>')
+
+  if (data.companion.indexOf(USER_ID)!=-1 && $('#scrims_chat_init').attr('data-init') != data.group){
     $('.scrims_chat_companion').each(function() {
       if($(this).attr('data-init') == data.group){
         //var count = parseInt($('.scrims_chat_count_message').text())
@@ -731,7 +736,7 @@ if(group == true){
           $(this).find(".pull-right").html('<div  class="badge scrims_chat_count_message shake-'+data.group+'">'+(count+1)+'</div>')
 
         }
-        user = USERS.filter(a => a.id==parseInt(data.group))
+        user = USERS.filter(a => a.id==data.group)
         noty(user[0].name, user[0].img, 'Отправил(а) вам') //-----------------------------------> lang
 
         $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion" data-init="'+data.group+'" data-group="true">'+$(this).html())
@@ -744,7 +749,7 @@ if(group == true){
   }
 
     //if couple
-  if (data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) != data.user) {
+  if (data.companion === USER_ID && $('#scrims_chat_canvas').attr('data-init') != data.user) {
         $('.scrims_chat_companion').each(function() {
 
           if($(this).attr('data-init') == data.user){
@@ -756,7 +761,7 @@ if(group == true){
               $(this).find(".pull-right").html('<div  class="badge scrims_chat_count_message shake-'+data.user+'">'+(count+1)+'</div>')
 
             }
-            user = USERS.filter(a => a.id==parseInt(data.user))
+            user = USERS.filter(a => a.id==data.user)
             noty(user[0].name, user[0].img, 'Отправил(а) вам') //-----------------------------------> lang
 
             $('#scrims_chat_contact_list').prepend('<div class="row sideBar-body scrims_chat_companion" data-init="'+data.user+'" data-group="false">'+$(this).html())
@@ -832,9 +837,9 @@ socket.on('msg readed',data=>MSG_READED(data))
       if(width_window<700){
           e.preventDefault();
           $('#scrims_chat_textarea').focus();
-          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
+          SEND_MESSAGE( USER_ID, $('#scrims_chat_init').attr('data-init'), 'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
       }else{
-          SEND_MESSAGE( USER_ID, parseInt($('#scrims_chat_init').attr('data-init')), 'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
+          SEND_MESSAGE( USER_ID, $('#scrims_chat_init').attr('data-init'), 'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
       }
   })
 
@@ -847,7 +852,7 @@ socket.on('msg readed',data=>MSG_READED(data))
         }else{
             var group = false
         }
-        var companion = parseInt($('#scrims_chat_init').attr('data-init'))
+        var companion = $('#scrims_chat_init').attr('data-init')
 
 
         SEND_MESSAGE( USER_ID, companion,'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
@@ -939,13 +944,13 @@ function debounce(func, wait, immediate) {
 
 
   function TYPYNG_MSG(){
-    socket.emit('user typing',{"user":USER_ID,"companion":parseInt($('#scrims_chat_init').attr('data-init'))})
+    socket.emit('user typing',{"user":USER_ID,"companion":$('#scrims_chat_init').attr('data-init')})
   }
 
   function TYPYNG_USR(data){
 
 
-    if(data.companion === USER_ID && parseInt($('#scrims_chat_canvas').attr('data-init')) === data.user){
+    if(data.companion === USER_ID && $('#scrims_chat_canvas').attr('data-init') === data.user){
 
       $('.heading-typing').fadeIn(200)
       clearTimeout(timerId);

@@ -5,6 +5,7 @@ from scrms.settings import MEDIA_URL
 
 
 class Group(models.Model):
+    init =  models.CharField(max_length=32)
     #user = models.ManyToManyField(User,on_delete=models.CASCADE,null=True,blank=True)
     name = models.CharField(max_length=255, blank=True)
     date_create = models.DateTimeField(null=True)
@@ -14,6 +15,7 @@ class Group(models.Model):
 
 
 class User(models.Model):
+    init = models.CharField(max_length=32,blank=True)
     group = models.ManyToManyField(Group,blank=True)
     image = models.ImageField(upload_to='user/', blank=True, verbose_name='')
     name = models.CharField(max_length=100,blank=True)
@@ -36,7 +38,7 @@ class User(models.Model):
 
 
 class Membership(models.Model):
-    group = models.ForeignKey(Group,on_delete=models.CASCADE,null=True,blank=True)
+    group = models.CharField(max_length=32,blank=True)
     users = models.ManyToManyField(User,blank=True)
 
 
@@ -50,9 +52,9 @@ class Message(models.Model):
         ('2', 'file'),
         ('3', 'link'),
     )
-    group = models.ForeignKey(Group,on_delete=models.CASCADE,null=True)
-    user = models.ForeignKey(User,on_delete=models.CASCADE)
-    companion = models.IntegerField(null=True)
+    group = models.CharField(max_length=32,blank=True)
+    user = models.CharField(max_length=32,blank=True)
+    companion = models.CharField(max_length=32,blank=True)
     text = models.TextField()
     img = models.CharField(max_length=255,null=True)
     type_msg = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False,blank=True)
@@ -63,8 +65,8 @@ class Message(models.Model):
 
 
 class LastMessage(models.Model):
-    companion_1 = models.IntegerField()
-    companion_2 = models.IntegerField()
+    companion_1 = models.CharField(max_length=32,blank=True)
+    companion_2 = models.CharField(max_length=32,blank=True)
     text = models.TextField()
     id_msg = models.IntegerField()
     type_msg = models.CharField(max_length=10)

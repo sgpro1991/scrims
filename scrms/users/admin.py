@@ -14,7 +14,7 @@ import hashlib
 
 
 class UserAdmin(admin.ModelAdmin):
-    fields = ('group','image', 'image_tag','name','hash_password','email','phone','position','public_key_user','subordinate','about','status')
+    fields = ('init','group','image', 'image_tag','name','hash_password','email','phone','position','public_key_user','subordinate','about','status')
     readonly_fields = ('image_tag',)
     search_fields = ('name',)
     def save_model(self, request, obj, form, change):
@@ -22,6 +22,7 @@ class UserAdmin(admin.ModelAdmin):
         obj.user = request.user
         if obj.id is None:
             password = get_random_string(length=11)
+            init = get_random_string(length=32)
             publick_key = get_random_string(length=32)
             crypt = Crypto().Encrypt(password)
             hash_sha256 = hashlib.sha256(password.encode('utf-8'))
@@ -33,8 +34,7 @@ class UserAdmin(admin.ModelAdmin):
         super().save_model(request, obj, form, change)
         if crypt != '':
             print(password)
-            #!!!!!!!!!!!!!!!!!!!!!!!!!! replace about
-            User.objects.filter(id=obj.id).update(password=crypt,hash_password=hash_sha256.hexdigest(),about=password,public_key_user=publick_key)
+            User.objects.filter(id=obj.id).update(init=init,password=crypt,hash_password=hash_sha256.hexdigest(),about=password,public_key_user=publick_key)
 
 
 admin.site.register(Membership)

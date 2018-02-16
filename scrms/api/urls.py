@@ -10,5 +10,5 @@ urlpatterns = [
     path('get-status/<str:id_user>/', GetStatus),
     path('read-msg/<int:id_msg>/', ReadMsg),
     path('get-history-about/', GetHistoryAbout),
-    path('get-users-group/<int:id_group>/', GetUsersGroup),
+    path('get-users-group/<str:id_group>/', GetUsersGroup),
 ]

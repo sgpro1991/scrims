@@ -61,7 +61,7 @@ def Auth(request):
                 resp.set_cookie('SCRIMS_TOKEN',token)
 
                 with open(BASE_DIR+'/sessions/'+token,'w',encoding='utf-8') as f:
-                     json = '[{"id":"'+str(a.id)+'","ip":"'+request.META.get('REMOTE_ADDR')+'"}]'
+                     json = '[{"id":"'+str(a.init)+'","ip":"'+request.META.get('REMOTE_ADDR')+'"}]'
                      f.write(crypto.Encrypt(json))
                 return resp
 
@@ -236,11 +236,14 @@ def AuthForm(request):
 
 def Main(request):
     user = CheckAuth(request)
+
+
     if user == False:
         return redirect('/auth/')
 
-    user_data = User.objects.get(pk=user[0]['id'])
-    users = User.objects.all().exclude(pk=user[0]['id']).order_by('-status')
+    
+    user_data = User.objects.get(init=user[0]['id'])
+    users = User.objects.all().exclude(init=user[0]['id']).order_by('-status')
 
 
     ids = []
@@ -249,15 +252,16 @@ def Main(request):
 
     group = Group.objects.filter(pk__in=ids)
 
-    user_mass = []
 
+
+    user_mass = []
     for a in users:
-        count = Message.objects.filter(user=a.id,companion=user[0]['id'],reading=False).count()
-        last_message = LastMessage.objects.filter(companion_1=int(a.id),companion_2=int(user[0]['id'])) | LastMessage.objects.filter(companion_1=int(user[0]['id']),companion_2=int(a.id))
+        count = Message.objects.filter(user=a.init,companion=user[0]['id'],reading=False).count()
+        last_message = LastMessage.objects.filter(companion_1=a.init,companion_2=user[0]['id']) | LastMessage.objects.filter(companion_1=user[0]['id'],companion_2=a.init)
         user_mass.append({
             "group":group,
             "search":a.name.split(" "),
-            "id":a.id,
+            "id":a.init,
             "name":a.name,
             "count_msg":count,
             "image":a.image,

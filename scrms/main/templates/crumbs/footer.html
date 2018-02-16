@@ -76,7 +76,7 @@
 
 
 const LANG = 0 //{{lang}}
-const USER_ID = {{user.id}}
+const USER_ID = "{{user.init}}"
 const USER_IMG = "{% thumbnail user.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}"
 const KEY = "{{user.public_key_user}}"
 const USERS = [{% for item in users  %}
@@ -96,7 +96,7 @@ const USERS = [{% for item in users  %}
                 {% for item in group  %}
                 {
                   "search":["{{item.name}}"],
-                  "id":"{{item.id}}",
+                  "id":"{{item.init}}",
                   "name":"{{item.name}}",
                   "count_msg":"{{item.count_msg}}",
                   "img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}",
