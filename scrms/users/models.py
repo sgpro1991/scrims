@@ -6,9 +6,11 @@ from scrms.settings import MEDIA_URL
 
 class Group(models.Model):
     init =  models.CharField(max_length=32)
-    #user = models.ManyToManyField(User,on_delete=models.CASCADE,null=True,blank=True)
+    admin = models.CharField(max_length=32)
     name = models.CharField(max_length=255, blank=True)
     date_create = models.DateTimeField(null=True)
+    image = models.ImageField(upload_to='group/', blank=True, verbose_name='')
+    public_key = models.CharField(max_length=255, blank=True)
     #last _message =
     def __str__(self):              # __unicode__ on Python 2
         return self.name
@@ -61,6 +63,7 @@ class Message(models.Model):
     date = models.DateTimeField(null=True)
     delivered = models.BooleanField(default=False)
     reading = models.BooleanField(default=False)
+    reading_group = models.ManyToManyField(User,blank=True)
 
 
 

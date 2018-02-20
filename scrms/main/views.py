@@ -98,7 +98,7 @@ def FileUpload(request):
     name = get_random_string(length=32)
 
     type_file = (os.path.splitext(file_add.name)[1]).replace(".",'')
-    usr = User.objects.get(id=user[0]['id'])
+    usr = User.objects.get(init=user[0]['id'])
     data=file_add.read()
 
     path = BASE_DIR+'/media/storage/'+str(date.today())+'/'
@@ -241,7 +241,7 @@ def Main(request):
     if user == False:
         return redirect('/auth/')
 
-    
+
     user_data = User.objects.get(init=user[0]['id'])
     users = User.objects.all().exclude(init=user[0]['id']).order_by('-status')
 
@@ -250,8 +250,22 @@ def Main(request):
     for i in user_data.group.all():
         ids.append(i.id)
 
-    group = Group.objects.filter(pk__in=ids)
+    group = Group.objects.filter(pk__in=ids) # получаем группы в которых состоит юзер
 
+    group_mass = []
+    for a in group:
+        count = Message.objects.filter(group=a.init,reading_group=user_data).count()
+        group_mass.append({
+            "search":a.name,
+            "id":a.init,
+            "name":a.name,
+            "count_msg":count,
+            "image":a.image,
+            "status":True,
+            #"users_group":
+            #"last_msg":last_message,
+            "public_key":a.public_key,
+        })
 
 
     user_mass = []
@@ -271,5 +285,5 @@ def Main(request):
         })
 
     #print(user_mass)
-    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':str(LANG),"group":group})
+    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':str(LANG),"group":group_mass})
     #return render(request,"react/react-home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})

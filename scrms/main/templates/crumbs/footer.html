@@ -96,14 +96,13 @@ const USERS = [{% for item in users  %}
                 {% for item in group  %}
                 {
                   "search":["{{item.name}}"],
-                  "id":"{{item.init}}",
+                  "id":"{{item.id}}",
                   "name":"{{item.name}}",
                   "count_msg":"{{item.count_msg}}",
                   "img":"{% thumbnail item.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}",
-                  "public_key":"{{item.public_key_user}}",
+                  "public_key":"{{item.public_key}}",
                   "last_msg":"{{item.last_msg.0.text}}",
                   "group":true,
-                  "users":[{{item.users_group}}],
                   "last_msg_type":"{{item.last_msg.0.type_msg}}",
                   "status":true,
                 },

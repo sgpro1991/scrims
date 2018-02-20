@@ -23,6 +23,10 @@ console.log(s2)
 
 function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty){
 
+  $('#dialog-chat').dialog({
+      autoOpen: false,
+      modal: true,
+    });
 
 
 
@@ -87,7 +91,7 @@ function RENDER_USERS_ITEM(v,arg){
         </div>
       </div>`)
   }else{
-    $('#scrims_chat_contact_list').prepend(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}" data-type="${v.group}">
+    $('#scrims_chat_contact_list').prepend(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}" data-group="${v.group}">
         <div class="col-sm-2 col-xs-2 sideBar-avatar">
           ${status}
             <img src="${v.img}" width="50px" height="50px">
@@ -202,11 +206,10 @@ RENDER_USERS(USERS)
 
 
 
-    SEND_MESSAGE(USER_ID, $('#scrims_chat_init').attr('data-init'), "file", body, USER_IMG,group)
+    SEND_MESSAGE(USER_ID, $('#scrims_chat_init').attr('data-init'), "file", body, USER_IMG, group)
 
     setTimeout(function(){
       $('.previewsContainer').empty()
-
     },4000)
 
   });
@@ -843,6 +846,10 @@ socket.on('msg readed',data=>MSG_READED(data))
       }
   })
 
+
+
+
+
  //ctr+enter send message
   $('#scrims_chat_textarea').bind('keypress', function(event) {
       if((event.keyCode == 10 || event.keyCode == 13) && event.ctrlKey) {
@@ -860,6 +867,18 @@ socket.on('msg readed',data=>MSG_READED(data))
       }
   });
 
+
+
+  function CREATE_GROUP(){
+      $('#dialog-chat').dialog('open')
+  }
+
+
+  $('#scrims_chat_create_group').on('click',function(){
+
+    CREATE_GROUP()
+
+  })
 
 
   $('#searchText').off('keydown')

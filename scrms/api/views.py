@@ -24,9 +24,6 @@ def SendMessage(request):
     type_msg = request.POST.get('type',False)
     date = request.POST.get('date',False)
 
-
-    print(companion)
-
     if companion and type_msg and date:
         if companion == "NaN":
             return HttpResponse(status=400)
@@ -64,6 +61,10 @@ def SendMessage(request):
                                  delivered=True)
                 companion = users_mass
                 group = group.init
+                insert.save()
+                for a in users_mass:
+                    usr = User.objects.get(init=a)
+                    insert.reading_group.add(usr)
             else:
                 insert = Message(user=user.init,
                                  companion=companion,
@@ -73,7 +74,7 @@ def SendMessage(request):
                                  img = im.url,
                                  delivered=True)
                 group = ''
-            insert.save()
+                insert.save()
             #last_msg(insert,user,companion,type_msg)
             json_resp = {"group":str(group),
                     "user":str(user.init),
@@ -94,34 +95,45 @@ def SendMessage(request):
             body = string
 
             if request.GET.get('group',False) == '1':
-                group = Group.objects.get(pk=companion)
-                users = Membership.objects.get(group=group.id)
+                group = Group.objects.get(init=companion)
+                users = Membership.objects.get(group=group.init)
                 users_mass = []
                 for i in users.users.all():
-                    if int(i.id) != int(auth_user[0]['id']):
+                    if i.init != auth_user[0]['id']:
                         users_mass.append(i.id)
 
-                insert = Message(group=group,
-                                 user=user,
+                insert = Message(group=group.init,
+                                 user=user.init,
                                  text=body,
-                                 type_msg='1',
+                                 type_msg='2',
                                  date=date,
                                  img = im.url,
                                  delivered=True)
                 companion = users_mass
                 group = group.id
             else:
-                insert = Message(user=user,
+                insert = Message(user=user.init,
                                  companion=companion,
                                  text=body,
-                                 type_msg='1',
+                                 type_msg='2',
                                  date=date,
                                  img=im.url,
                                  delivered=True)
                 group = ''
             insert.save()
             #last_msg(insert,user,companion,type_msg)
-            return HttpResponse('{"group":"'+str(group)+'","user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'","img":"'+im.url+'"}')
+            json_resp = {"group":str(group),
+                    "user":str(user.init),
+                    "companion":str(companion),
+                    "body":body,
+                    "date":date,
+                    "type":type_msg,
+                    "id_msg":str(insert.id),"img":im.url
+                    }
+            return HttpResponse(json.dumps(json_resp))
+
+
+            #return HttpResponse('{"group":"'+str(group)+'","user":'+str(user.id)+',"companion":'+str(companion)+',"body":"'+string+'","date":"'+date+'","type":"'+type_msg+'","id_msg":"'+str(insert.id)+'","img":"'+im.url+'"}')
 
     else:
         return HttpResponse(status=404)
@@ -244,12 +256,14 @@ def GetHistory(request):
 
     if int(group) == 1:
         count = Message.objects.filter(group=companion).count()
-        #not_read = Message.objects.filter(group=int(companion),reading=False)
-        #if len(not_read)>0:
         if (count-10) <= 0:
             data = Message.objects.filter(group=companion).order_by('date')
         else:
             data = Message.objects.filter(group=companion).order_by('date')[(count-10):count]
+        data.update(reading=True)
+        for a in data:
+            usr = User.objects.get(init=user)
+            a.reading_group.remove(usr)
         return HttpResponse(json.dumps(AsembleHistory(data,companion,True,request,user_auth)))
 
 
@@ -259,8 +273,6 @@ def GetHistory(request):
 
     count = Message.objects.filter(Q(user=companion,companion=user)|Q(user=user,companion=companion)).count()
     not_read = Message.objects.filter(user=companion,companion=user,reading=False)
-
-
 
     if len(not_read)>0:
         if (count-len(not_read)-10) <= 0:
