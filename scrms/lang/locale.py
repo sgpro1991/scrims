@@ -13,6 +13,8 @@ RU = [{
     }],
     "chat":[{
         "previous":"Загрузить более ранние сообщения",
+        "create_group":"Создать группу",
+        "invite":"Пригласить",
     }]
 }]
 
@@ -34,7 +36,9 @@ EN = [{
         "profile":"Profile",
     }],
     "chat":[{
-        "previous":"Show Previous Message!",
+        "previous":"Show Previous Message",
+        "create_group":"Create group",
+        "invite":"To invite",
     }]
 
 }]

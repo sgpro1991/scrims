@@ -21,7 +21,7 @@ console.log(s1)
 console.log(s2)
 */
 
-function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty){
+function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG){
 
   $('#dialog-chat').dialog({
       autoOpen: false,
@@ -263,7 +263,7 @@ RENDER_USERS(USERS)
 
         $('#scrims_chat_canvas').attr('data-init',id)
 
-        $('#scrims_chat_heading').append(`<div id="scrims_chat_init" class="col-sm-10 col-md-10 col-xs-10 heading-avatar" style="position:absolute;overflow: top:0;hidden;height: 50px;" data-init="${id}" data-public-key="123" data-group="true"></div>`)
+        $('#scrims_chat_heading').append(`<div id="scrims_chat_init" class="col-sm-10 col-md-10 col-xs-10 heading-avatar" style="position:absolute;overflow:hidden; top:0;height: 50px;" data-init="${id}" data-public-key="123" data-group="true"></div>`)
 
         $.each(users,function(k,v){
           console.log(v)
@@ -405,12 +405,12 @@ function PREVIOUS_MESSAGE(id,group){
               var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
             }
           //var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
-          var img = '<img src="'+v.img+'" style="width:40px;height:40px;border-radius:50%;position:absolute;left:-65px;top: -40px;"/>'
+          var img = '<img src="'+v.img+'" style="width:30px;height:30px;border-radius:50%;position:absolute;left:-50px;top: -25px;"/>'
 
         }else {
           var cls_mess = 'sender'
           var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
-          var img = '<img src="'+v.img+'" style="width:40px;height:40px;border-radius:50%;position:absolute;right:-65px;top: -40px;"/>'
+          var img = '<img src="'+v.img+'" style="width:30px;height:30px;border-radius:50%;position:absolute;right:-50px;top: -25px;"/>'
 
         }
 
@@ -469,7 +469,7 @@ function PREVIOUS_MESSAGE(id,group){
           $('#scrims_chat_canvas').prepend(`<div class="row message-previous"  data-init="${id}" style="display:none">
             <div class="col-sm-12 previous">
               <b>
-              Show Previous Message!
+              ${LANG[0].chat[0].previous}
               <b>
             </div>
           </div>`)
@@ -710,7 +710,7 @@ function PARSER_WEBSOKET_MESSAGE(data,decrypt,type){
                 ${galki}
               </span>
               <div class="col-sm-12">
-              <img src="${data.img}" style="width:40px;height:40px;border-radius:50%;position:absolute;${position}:-65px;top: -40px;">
+              <img src="${data.img}" style="width:30px;height:30px;border-radius:50%;position:absolute;${position}:-50px;top: -25px;">
               </div>
             </div>
           </div>
@@ -870,14 +870,43 @@ socket.on('msg readed',data=>MSG_READED(data))
 
 
   function CREATE_GROUP(){
-      $('#dialog-chat').dialog('open')
+    $('#dialog-chat-content').empty()
+    $('#dialog-chat-content').append(`<div>
+                                          <input type="text" class="form-control" palceholder="lang" /><br>
+                                          <h3>${LANG[0].chat[0].invite}</h3>
+                                          <ul id="dialog_list_users" class="list-group"></ul>
+                                          <br>
+                                          <button class="form-control btn btn-success">${LANG[0].chat[0].create_group}</button>
+                                      </div>`)
+
+    let users = USERS.filter(d => d.group==false)
+    $.each(users,function(k,v){
+        $('#dialog_list_users').append(`<li class="list-group-item invite">${v.name}</li>`)
+    })
+
+    ACTION_CLICK_GROUP_INVITE()
+
+    $('#dialog-chat').dialog('open')
   }
 
 
+
+  function ACTION_CLICK_GROUP_INVITE(){
+      $('.invite').click(function(){
+        if($(this).hasClass('active') == true){
+          $(this).removeClass('active')
+        }else{
+          $(this).addClass('active')
+        }
+
+      })
+  }
+
+
+
+
   $('#scrims_chat_create_group').on('click',function(){
-
     CREATE_GROUP()
-
   })
 
 

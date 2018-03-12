@@ -440,45 +440,57 @@ padding: 20px 20px; */}
 }
 
 
-   #scrims_chat_canvas::-webkit-scrollbar-track
+
+
+
+
+   *::-webkit-scrollbar-track
    {
    	background-color: transparent;
-    width: 3px;
+    width: 4px;
    }
 
-   #scrims_chat_canvas::-webkit-scrollbar
+   *::-webkit-scrollbar
    {
    	width: 5px;
    	background-color: transparent;
    }
 
-   #scrims_chat_canvas::-webkit-scrollbar-thumb
+   *::-webkit-scrollbar-thumb
    {
-   	background-color: #293a46;
-    width: 3px;
+   	background-color: #566c79;
+    width: 4px;
    }
 
 
-   #scrims_chat_contact_list::-webkit-scrollbar-track
+   *::-webkit-scrollbar-track
    {
    	background-color: transparent;
-    width: 3px;
+    width: 4px;
    }
 
-   #scrims_chat_contact_list::-webkit-scrollbar
+   *::-webkit-scrollbar
    {
    	width: 5px;
    	background-color: transparent;
    }
 
-   #scrims_chat_contact_list::-webkit-scrollbar-thumb
+   *::-webkit-scrollbar-thumb
    {
-   	background-color: #293a46;
-    width: 3px;
+   	background-color: #566c79;
+    width: 4px;
    }
 
 
+#dialog_list_users{
+  height:200px;
+  overflow:auto;
+  cursor:pointer;
+}
 
+#dialog_list_users li:hover{
+  background: #ccc;
+}
 
 .message-main-receiver{
       margin: 3px 0;
@@ -902,7 +914,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      font-size: 5px;
      word-wrap: break-word;
      display: inline-block;
-     margin: 0 0px 0 45px;
+     margin: 0 0px 0 30px;
    }
 
 .cleanstate_chat_companion{
@@ -919,7 +931,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      font-size: 12px;
      display: inline-block;
      word-wrap: break-word;
-     margin: 0 45px 0px 0px;
+     margin: 0 30px 0px 0px;
    }
 
 .reading_msg, .delivered_msg{

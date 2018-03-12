@@ -40,10 +40,14 @@ def SendMessage(request):
         '''
         im = get_thumbnail(user.image,"50x50", crop="center")
 
+        ###################
+        # IF TEXT MESSAGE
+        ##################
         if type_msg == "text":
             escape_string = html.escape(request.POST.get('body',False)).replace("&lt;br&gt;","<br>")
             #body = crypto.Encrypt(escape_string)
             body = escape_string
+            ###### IF GROUP #####
             if request.GET.get('group',False) == '1':
                 group = Group.objects.get(init=companion)
                 users = Membership.objects.get(group=group.init)
@@ -75,6 +79,7 @@ def SendMessage(request):
                                  delivered=True)
                 group = ''
                 insert.save()
+
             #last_msg(insert,user,companion,type_msg)
             json_resp = {"group":str(group),
                     "user":str(user.init),
@@ -82,25 +87,26 @@ def SendMessage(request):
                     "body":escape_string,
                     "date":date,
                     "type":type_msg,
-                    "id_msg":str(insert.id),"img":im.url
+                    "id_msg":str(insert.id),
+                    "img":im.url,
                     }
             return HttpResponse(json.dumps(json_resp))
 
-
-
+        ###################
+        # IF FILE MESSAGE
+        ##################
         if type_msg == "file":
             string = request.POST.get('body',False)
             #body = crypto.Encrypt(string)
 
             body = string
-
             if request.GET.get('group',False) == '1':
                 group = Group.objects.get(init=companion)
                 users = Membership.objects.get(group=group.init)
                 users_mass = []
                 for i in users.users.all():
                     if i.init != auth_user[0]['id']:
-                        users_mass.append(i.id)
+                        users_mass.append(i.init)
 
                 insert = Message(group=group.init,
                                  user=user.init,
@@ -110,7 +116,11 @@ def SendMessage(request):
                                  img = im.url,
                                  delivered=True)
                 companion = users_mass
-                group = group.id
+                group = group.init
+                insert.save()
+                for a in users_mass:
+                    usr = User.objects.get(init=a)
+                    insert.reading_group.add(usr)
             else:
                 insert = Message(user=user.init,
                                  companion=companion,
@@ -120,16 +130,17 @@ def SendMessage(request):
                                  img=im.url,
                                  delivered=True)
                 group = ''
-            insert.save()
+                insert.save()
             #last_msg(insert,user,companion,type_msg)
             json_resp = {"group":str(group),
-                    "user":str(user.init),
-                    "companion":str(companion),
-                    "body":body,
-                    "date":date,
-                    "type":type_msg,
-                    "id_msg":str(insert.id),"img":im.url
-                    }
+                        "user":str(user.init),
+                        "companion":str(companion),
+                        "body":body,
+                        "date":date,
+                        "type":type_msg,
+                        "id_msg":str(insert.id),
+                        "img":im.url
+                        }
             return HttpResponse(json.dumps(json_resp))
 
 
@@ -217,6 +228,14 @@ def GetHistoryAbout(request):
 
         data = Message.objects.filter(group=companion).order_by('date')[lim:lim2]
         print(data)
+        try:
+            data.update(reading=True)
+        except:
+            pass
+
+        for a in data:
+            usr = User.objects.get(init=user)
+            a.reading_group.remove(usr)
         return HttpResponse(json.dumps(AsembleHistory(data,companion,True,request,user_auth)))
 
 
@@ -260,7 +279,11 @@ def GetHistory(request):
             data = Message.objects.filter(group=companion).order_by('date')
         else:
             data = Message.objects.filter(group=companion).order_by('date')[(count-10):count]
-        data.update(reading=True)
+        try:
+            data.update(reading=True)
+        except:
+            pass
+
         for a in data:
             usr = User.objects.get(init=user)
             a.reading_group.remove(usr)
