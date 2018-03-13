@@ -15,6 +15,10 @@ RU = [{
         "previous":"Загрузить более ранние сообщения",
         "create_group":"Создать группу",
         "invite":"Пригласить",
+        "name_group":"Имя группы",
+    }],
+    "common":[{
+        "save":"Сохранить",
     }]
 }]
 
@@ -39,6 +43,10 @@ EN = [{
         "previous":"Show Previous Message",
         "create_group":"Create group",
         "invite":"To invite",
+        "name_group":"Name group",
+    }],
+    "common":[{
+        "save":"Save",
     }]
 
 }]

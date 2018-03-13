@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.http import HttpResponse
 from main.views import *
-from users.models import User, Message, LastMessage, Membership
+from users.models import User, Message, LastMessage, Membership, Group
 from datetime import datetime
 from django.utils.dateparse import parse_datetime
 from django.db.models import Q
@@ -10,8 +10,39 @@ from django.utils.html import strip_tags
 from bs4 import BeautifulSoup
 from sorl.thumbnail import get_thumbnail
 import html
+from django.utils.crypto import get_random_string
 
 crypto = Crypto()
+
+
+def CreateGroup(request):
+    auth_user = CheckAuth(request)
+    if auth_user == False:
+        return HttpResponse(status=403)
+
+    name = request.POST.get('name', False)
+    users_group = request.POST.get('users',False)
+
+    user_admin = User.objects.get(init=auth_user[0]['id'])
+
+    #### CREATE GROUP #####
+    init = get_random_string(length=32)
+    key = get_random_string(length=32)
+    insert = Group(init=init,admin=user_admin.id,name=name,date_create=datetime.now(),public_key=key)
+    insert.save()
+    #### CREATE GROUP #####
+    insert.id
+
+
+    a = User.objects.filter(init__in= users_group.split(','))
+    print(a)
+
+    Membership(group=init)
+
+
+    return HttpResponse(1)
+
+
 
 
 def SendMessage(request):

@@ -517,9 +517,7 @@ function PREVIOUS_MESSAGE(id,group){
         }
       }
     })
-
     return data
-
   }
 
 
@@ -869,23 +867,73 @@ socket.on('msg readed',data=>MSG_READED(data))
 
 
 
-  function CREATE_GROUP(){
+function AJAX(url,type,data){
+  console.log(data)
+
+  var response = $.ajax({
+    url:url,
+    type:type,
+    data:data,
+  }).done(function(data){
+    response = data
+  })
+  return response;
+}
+
+
+
+
+function CREATE_GROUP(){
     $('#dialog-chat-content').empty()
     $('#dialog-chat-content').append(`<div>
-                                          <input type="text" class="form-control" palceholder="lang" /><br>
-                                          <h3>${LANG[0].chat[0].invite}</h3>
+                                          <!--<label>${LANG[0].chat[0].name_group}</label>-->
+                                          <input id="name_create_group" type="text" class="form-control" placeholder="${LANG[0].chat[0].name_group}" /><br>
+                                          <label>${LANG[0].chat[0].invite}</label>
                                           <ul id="dialog_list_users" class="list-group"></ul>
                                           <br>
-                                          <button class="form-control btn btn-success">${LANG[0].chat[0].create_group}</button>
+                                          <button id="btn_create_group" class="form-control btn btn-success">${LANG[0].common[0].save}</button>
                                       </div>`)
 
     let users = USERS.filter(d => d.group==false)
     $.each(users,function(k,v){
-        $('#dialog_list_users').append(`<li class="list-group-item invite">${v.name}</li>`)
+        $('#dialog_list_users').append(`<li data-id="${v.id}" class="list-group-item invite">${v.name}</li>`)
     })
 
     ACTION_CLICK_GROUP_INVITE()
 
+    $('#btn_create_group').click(function(){
+      users_group = []
+      $('.invite').each(function(){
+          if($(this).hasClass('active')==true){
+            users_group.push($(this).attr('data-id'))
+          }
+      })
+
+      console.log(users_group)
+
+      if($('#name_create_group').val() == '' ){
+          $('#name_create_group').css({'box-shadow':'0 0 0 1px #f00'})
+          $('#name_create_group').focus()
+          setTimeout(function(){
+            $('#name_create_group').css({'box-shadow':''})
+          },2000)
+      }else if (users_group == ''){
+          $('#dialog_list_users').css({'box-shadow':'0 0 0 1px #f00'})
+        setTimeout(function(){
+          $('#dialog_list_users').css({'box-shadow':''})
+        },2000)
+      }else{
+
+        let data = {
+          'name':$('#name_create_group').val(),
+          'csrfmiddlewaretoken':csrf_token,
+          'users':users_group.join(','),
+        }
+
+        console.log(AJAX('/api/create-group/','post', data))
+      }
+    })
+    $('#dialog-chat').dialog('option', 'title',LANG[0].chat[0].create_group );
     $('#dialog-chat').dialog('open')
   }
 
