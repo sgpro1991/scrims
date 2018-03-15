@@ -21,11 +21,34 @@ console.log(s1)
 console.log(s2)
 */
 
-function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG){
+
+
+
+function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY){
+
 
   $('#dialog-chat').dialog({
       autoOpen: false,
       modal: true,
+      //width:'100%',
+      buttons:
+      [
+          {
+            text: LANG[0].common[0].save,
+            class:'btn btn-success',
+            click: function (data) {
+                if($('#id-dialog-param').attr('data-init') == 'create-group'){
+                  CREATE_GROUP_SERVER()
+                }
+              }
+          },{
+            text:LANG[0].common[0].cancel,
+            class:'btn btn-default',
+            click: function () {
+                $(this).dialog("close");
+            }
+          }
+        ]
     });
 
 
@@ -868,30 +891,90 @@ socket.on('msg readed',data=>MSG_READED(data))
 
 
 function AJAX(url,type,data){
-  console.log(data)
-
-  var response = $.ajax({
+  return $.ajax({
     url:url,
     type:type,
+    dataType:'json',
     data:data,
   }).done(function(data){
-    response = data
   })
-  return response;
 }
 
+
+
+function CREATE_GROUP_SERVER(){
+
+  users_group = []
+  $('.invite').each(function(){
+      if($(this).hasClass('active')==true){
+        users_group.push($(this).attr('data-id'))
+      }
+  })
+  $('#name_create_group').keydown(function(){
+    $('#name_create_group').css({'box-shadow':''})
+  })
+  if($('#name_create_group').val() == '' ){
+      $('#name_create_group').css({'box-shadow':'0 0 0 1px #f00'})
+      $('#name_create_group').focus()
+  }else if (users_group == ''){
+      $('#dialog_list_users').css({'box-shadow':'0 0 0 1px #f00'})
+  }else{
+    users_group.push(USER_ID)
+    let data = {
+          'name':$('#name_create_group').val(),
+          'csrfmiddlewaretoken':csrf_token,
+          'users':users_group.join(','),
+       }
+
+         var a = AJAX('/api/create-group/','post', data)
+         a.then(function(result){
+          if(result.status == 'success'){
+                console.log(result)
+
+                NOTY(3000, 'success',LANG[0].success[0].success_create_group)
+                $('#scrims_chat_contact_list').prepend(`<div class="row sideBar-body scrims_chat_companion" data-init="${result.init}" data-group="true">
+                                                      <div class="col-sm-2 col-xs-2 sideBar-avatar">
+                                                        <div class="avatar-icon avatar-icon-active">
+                                                          <img src="" width="50px" height="50px">
+                                                        </div>
+                                                      </div>
+                                                      <div class="col-sm-9 col-xs-9 sideBar-main">
+                                                        <div class="row">
+                                                          <div class="col-sm-8 col-xs-8 sideBar-name">
+                                                            <span class="name-meta">${result.name}</span>
+                                                            <div class="name-meta" style="color: #999;color: #999;overflow: hidden;width: 100%;text-overflow: ellipsis;"></div>
+                                                          </div>
+                                                          <div class="col-sm-3 col-xs-3 pull-right sideBar-time">
+                                                            <span class="time-meta pull-right">
+                                                          </span>
+
+                                                          </div>
+                                                        </div>
+                                                      </div>
+                                                    </div>`)
+                $('#dialog-chat').dialog("close");
+          }
+          if(result.status == 'error'){
+              if(result.reason == 'name exist'){
+                $('#name_create_group').val('')
+                NOTY(3000, 'error',LANG[0].error[0].error_group_exist)
+              }
+          }
+        })
+
+    }
+}
 
 
 
 function CREATE_GROUP(){
     $('#dialog-chat-content').empty()
-    $('#dialog-chat-content').append(`<div>
+    $('#dialog-chat-content').append(`<div id="id-dialog-param" data-init="create-group">
                                           <!--<label>${LANG[0].chat[0].name_group}</label>-->
                                           <input id="name_create_group" type="text" class="form-control" placeholder="${LANG[0].chat[0].name_group}" /><br>
                                           <label>${LANG[0].chat[0].invite}</label>
                                           <ul id="dialog_list_users" class="list-group"></ul>
                                           <br>
-                                          <button id="btn_create_group" class="form-control btn btn-success">${LANG[0].common[0].save}</button>
                                       </div>`)
 
     let users = USERS.filter(d => d.group==false)
@@ -900,43 +983,9 @@ function CREATE_GROUP(){
     })
 
     ACTION_CLICK_GROUP_INVITE()
-
-    $('#btn_create_group').click(function(){
-      users_group = []
-      $('.invite').each(function(){
-          if($(this).hasClass('active')==true){
-            users_group.push($(this).attr('data-id'))
-          }
-      })
-
-      users_group.push(USER_ID)
-
-      $('#name_create_group').keydown(function(){
-        $('#name_create_group').css({'box-shadow':''})
-      })
-
-      if($('#name_create_group').val() == '' ){
-
-          $('#name_create_group').css({'box-shadow':'0 0 0 1px #f00'})
-          $('#name_create_group').focus()
-
-      }else if (users_group == ''){
-          $('#dialog_list_users').css({'box-shadow':'0 0 0 1px #f00'})
-      }else{
-
-        let data = {
-          'name':$('#name_create_group').val(),
-          'csrfmiddlewaretoken':csrf_token,
-          'users':users_group.join(','),
-        }
-        console.log(AJAX('/api/create-group/','post', data))
-      }
-    })
-    $('#dialog-chat').dialog('option', 'title',LANG[0].chat[0].create_group );
+    $('#dialog-chat').dialog('option','title',LANG[0].chat[0].create_group );
     $('#dialog-chat').dialog('open')
   }
-
-
 
   function ACTION_CLICK_GROUP_INVITE(){
       $('.invite').click(function(){
@@ -946,8 +995,8 @@ function CREATE_GROUP(){
           $(this).addClass('active')
         }
         $('#dialog_list_users').css({'box-shadow':''})
-      })
-  }
+   })
+}
 
 
 
@@ -1058,7 +1107,6 @@ function debounce(func, wait, immediate) {
   }
 
   socket.on('user typing',data=>TYPYNG_USR(data))
-
 
   $('#scrims_chat_textarea').on('input change', debounce(TYPYNG_MSG, 220));
 

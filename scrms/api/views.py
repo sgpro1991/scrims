@@ -11,6 +11,7 @@ from bs4 import BeautifulSoup
 from sorl.thumbnail import get_thumbnail
 import html
 from django.utils.crypto import get_random_string
+from django.db import IntegrityError
 
 crypto = Crypto()
 
@@ -28,9 +29,12 @@ def CreateGroup(request):
     #### CREATE GROUP #####
     init = get_random_string(length=32)
     key = get_random_string(length=32)
-    insert = Group(init=init,admin=user_admin.id,name=name,date_create=datetime.now(),public_key=key)
-    insert.save()
-    #### CREATE GROUP #####
+    try:
+        insert = Group(init=init,admin=user_admin.id,name=name,date_create=datetime.now(),public_key=key)
+        insert.save()
+    except IntegrityError as e:
+        return HttpResponse('{"status":"error","reason":"name exist"}')
+    #### /CREATE GROUP #####
 
     users_in_group = User.objects.filter(init__in= users_group.split(','))
     a = list(users_in_group)
@@ -44,7 +48,7 @@ def CreateGroup(request):
     member = Membership.objects.get(group=init)
     member.users.add(*a)
 
-    return HttpResponse(1)
+    return HttpResponse('{"status":"success","init":"'+init+'","name":"'+name+'"}')
 
 
 

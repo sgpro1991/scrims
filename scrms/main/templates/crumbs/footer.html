@@ -54,7 +54,6 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/3.3.7/js/bootstrap.min.js"></script>
 <script src="/static/js/vendor/socket.io.js"></script>
 
-
 <!-- components -->
 <script  src="/static/js/component/chat.js"></script>
 <!-- /components -->
@@ -156,12 +155,19 @@ var noty = function(thebody,theicon,title){
 }
 
 
+var NOTY = function (timeout,type,text){
+    new Noty({
+      timeout: timeout,
+      type: type,
+      text: text
+    }).show();
+}
 
 $(document).ready(function(){
 
   notifyMe()
 
-  CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG)
+  CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY)
 })
 
 

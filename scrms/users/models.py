@@ -7,7 +7,7 @@ from scrms.settings import MEDIA_URL
 class Group(models.Model):
     init =  models.CharField(max_length=32)
     admin = models.CharField(max_length=32)
-    name = models.CharField(max_length=255, blank=True)
+    name = models.CharField(max_length=255, blank=True, unique=True)
     date_create = models.DateTimeField(null=True)
     image = models.ImageField(upload_to='group/', blank=True, verbose_name='')
     public_key = models.CharField(max_length=255, blank=True)

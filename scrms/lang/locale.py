@@ -9,7 +9,7 @@ RU = [{
     }],
     "menu":[{
         "profile":"Профиль",
-
+        "company":"Компания",
     }],
     "chat":[{
         "previous":"Загрузить более ранние сообщения",
@@ -19,7 +19,15 @@ RU = [{
     }],
     "common":[{
         "save":"Сохранить",
+        "cancel":"Отмена",
+    }],
+    "error":[{
+        "error_group_exist":"Группа с таким именем уже существует, пожалуйста  измените имя"
+    }],
+    "success":[{
+        "success_create_group":"группа создана"
     }]
+
 }]
 
 
@@ -38,6 +46,7 @@ EN = [{
     }],
     "menu":[{
         "profile":"Profile",
+        "company":"Company",
     }],
     "chat":[{
         "previous":"Show Previous Message",
@@ -47,6 +56,15 @@ EN = [{
     }],
     "common":[{
         "save":"Save",
+        "cancel":"Cancel",
+    }],
+    "error":[{
+        "error_group_exist":"A group with this name already exists, please change the name"
+    }],
+    "success":[{
+        "success_create_group":"group created"
     }]
+
+
 
 }]

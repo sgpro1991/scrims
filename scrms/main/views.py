@@ -285,5 +285,5 @@ def Main(request):
         })
 
     #print(user_mass)
-    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':str(LANG),"group":group_mass})
+    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':LANG,"group":group_mass})
     #return render(request,"react/react-home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})
