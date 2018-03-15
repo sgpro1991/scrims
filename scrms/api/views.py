@@ -31,14 +31,18 @@ def CreateGroup(request):
     insert = Group(init=init,admin=user_admin.id,name=name,date_create=datetime.now(),public_key=key)
     insert.save()
     #### CREATE GROUP #####
-    insert.id
 
+    users_in_group = User.objects.filter(init__in= users_group.split(','))
+    a = list(users_in_group)
 
-    a = User.objects.filter(init__in= users_group.split(','))
-    print(a)
+    for i in users_in_group:
+        usr = User.objects.get(id=i.id)
+        usr.group.add(insert.id)
 
-    Membership(group=init)
-
+    insert_membership = Membership(group=init)
+    insert_membership.save()
+    member = Membership.objects.get(group=init)
+    member.users.add(*a)
 
     return HttpResponse(1)
 

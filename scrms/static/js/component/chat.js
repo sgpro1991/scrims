@@ -909,19 +909,19 @@ function CREATE_GROUP(){
           }
       })
 
-      console.log(users_group)
+      users_group.push(USER_ID)
+
+      $('#name_create_group').keydown(function(){
+        $('#name_create_group').css({'box-shadow':''})
+      })
 
       if($('#name_create_group').val() == '' ){
+
           $('#name_create_group').css({'box-shadow':'0 0 0 1px #f00'})
           $('#name_create_group').focus()
-          setTimeout(function(){
-            $('#name_create_group').css({'box-shadow':''})
-          },2000)
+
       }else if (users_group == ''){
           $('#dialog_list_users').css({'box-shadow':'0 0 0 1px #f00'})
-        setTimeout(function(){
-          $('#dialog_list_users').css({'box-shadow':''})
-        },2000)
       }else{
 
         let data = {
@@ -929,7 +929,6 @@ function CREATE_GROUP(){
           'csrfmiddlewaretoken':csrf_token,
           'users':users_group.join(','),
         }
-
         console.log(AJAX('/api/create-group/','post', data))
       }
     })
@@ -946,7 +945,7 @@ function CREATE_GROUP(){
         }else{
           $(this).addClass('active')
         }
-
+        $('#dialog_list_users').css({'box-shadow':''})
       })
   }
 
