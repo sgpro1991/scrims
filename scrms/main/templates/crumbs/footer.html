@@ -80,7 +80,7 @@ console.log(LANG[0].chat[0].previous)
 const USER_ID = "{{user.init}}"
 const USER_IMG = "{% thumbnail user.image "50x50" crop="center" as im %}{{ im.url }}{% endthumbnail %}"
 const KEY = "{{user.public_key_user}}"
-const USERS = [{% for item in users  %}
+var USERS = [{% for item in users  %}
                 {
                   "search":[{% for a in item.search %}"{{a}}",{% endfor %}],
                   "id":"{{item.id}}",

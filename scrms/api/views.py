@@ -12,6 +12,8 @@ from sorl.thumbnail import get_thumbnail
 import html
 from django.utils.crypto import get_random_string
 from django.db import IntegrityError
+from sorl.thumbnail import get_thumbnail
+from django.contrib.postgres.search import SearchVector
 
 crypto = Crypto()
 
@@ -50,6 +52,166 @@ def CreateGroup(request):
 
     return HttpResponse('{"status":"success","init":"'+init+'","name":"'+name+'"}')
 
+
+
+
+def GetUsers(request):
+    user = CheckAuth(request)
+    if user == False:
+        return HttpResponse(status=403)
+
+
+    user_data = User.objects.get(init=user[0]['id'])
+    users = User.objects.all().exclude(init=user[0]['id']).order_by('-status')
+
+
+    ids = []
+    for i in user_data.group.all():
+        ids.append(i.id)
+
+    group = Group.objects.filter(pk__in=ids) # получаем группы в которых состоит юзер
+
+    group_mass = []
+    for a in group:
+        count = Message.objects.filter(group=a.init,reading_group=user_data).count()
+
+        if a.image.name != None:
+            img = get_thumbnail(a.image, "50x50", crop="center")
+        else:
+            img = ''
+        group_mass.append({
+            "search":a.name,
+            "id":a.init,
+            "name":a.name,
+            "count_msg":str(count),
+            "img":img,
+            "status":True,
+            #"users_group":
+            "last_msg":"",
+            "last_msg_type":"",
+            "public_key":a.public_key,
+        })
+
+
+    user_mass = []
+    for a in users:
+        count = Message.objects.filter(user=a.init,companion=user[0]['id'],reading=False).count()
+        last_message = LastMessage.objects.filter(companion_1=a.init,companion_2=user[0]['id']) | LastMessage.objects.filter(companion_1=user[0]['id'],companion_2=a.init)
+        m = []
+        for i in group:
+            m.append(i.name)
+
+        if a.image.name != None:
+            img = get_thumbnail(a.image, "50x50", crop="center")
+        else:
+            img = ''
+        user_mass.append({
+            "group":m,
+            "search":a.name.split(" "),
+            "id":a.init,
+            "name":a.name,
+            "count_msg":str(count),
+            "img":img.url,
+            "status":a.status,
+            "last_msg":'',#last_message,
+            "last_msg_type":'',
+            "public_key":a.public_key_user,
+        })
+    common_mass = user_mass+group_mass
+    #print(common_mass)
+
+    return HttpResponse(json.dumps(common_mass))
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def SearchUsers(request,word):
+    user = CheckAuth(request)
+    if user == False:
+        return HttpResponse(status=403)
+
+    user_data = User.objects.get(init=user[0]['id'])
+    group = Group.objects.annotate(
+            search=SearchVector('name'),
+    ).filter(search=word)
+
+
+    group_mass = []
+    for a in group:
+        count = Message.objects.filter(group=a.init,reading_group=user_data).count()
+
+        if a.image.name != None:
+            img = get_thumbnail(a.image, "50x50", crop="center")
+        else:
+            img = ''
+        group_mass.append({
+            "search":a.name,
+            "id":a.init,
+            "name":a.name,
+            "count_msg":str(count),
+            "img":img,
+            "status":True,
+            #"users_group":
+            "last_msg":"",
+            "last_msg_type":"",
+            "public_key":a.public_key,
+            "group":True,
+        })
+
+
+    users = User.objects.annotate(
+            search=SearchVector('name','dep__name','email'),
+    ).filter(search=word).exclude(init=user[0]['id'])
+
+    #users = User.objects.filter(name__search)
+
+
+    user_mass = []
+    for a in users:
+        count = Message.objects.filter(user=a.init,companion=user[0]['id'],reading=False).count()
+        last_message = LastMessage.objects.filter(companion_1=a.init,companion_2=user[0]['id']) | LastMessage.objects.filter(companion_1=user[0]['id'],companion_2=a.init)
+        m = []
+        for i in group:
+            m.append(i.name)
+
+        if a.image.name != None:
+            img = get_thumbnail(a.image, "50x50", crop="center")
+        else:
+            img = ''
+        user_mass.append({
+            "group":False,
+            "search":a.name.split(" "),
+            "id":a.init,
+            "name":a.name,
+            "count_msg":str(count),
+            "img":img.url,
+            "status":a.status,
+            "last_msg":'',#last_message,
+            "last_msg_type":'',
+            "public_key":a.public_key_user,
+        })
+    common_mass = user_mass+group_mass
+
+
+    return HttpResponse(json.dumps(common_mass))
 
 
 

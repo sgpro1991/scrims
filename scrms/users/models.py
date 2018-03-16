@@ -16,6 +16,13 @@ class Group(models.Model):
         return self.name
 
 
+
+class Departament(models.Model):
+    name = models.CharField(max_length=255,blank=True)
+    def __str__(self):              # __unicode__ on Python 2
+        return self.name
+
+
 class User(models.Model):
     init = models.CharField(max_length=32,blank=True)
     group = models.ManyToManyField(Group,blank=True)
@@ -31,6 +38,7 @@ class User(models.Model):
     is_deleted = models.BooleanField(blank=True,default=False)
     status = models.BooleanField(blank=True,default=False)
     public_key_user = models.CharField(max_length=255, blank=True)
+    dep = models.ForeignKey(Departament,on_delete=models.CASCADE,blank=True,null=True)
     def image_tag(self):
         return mark_safe('<img src='+MEDIA_URL+'%s style="max-width:200px" />' % (self.image))
     image_tag.short_description = 'Image'

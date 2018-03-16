@@ -27,6 +27,11 @@ console.log(s2)
 function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY){
 
 
+
+
+
+
+
   $('#dialog-chat').dialog({
       autoOpen: false,
       modal: true,
@@ -80,8 +85,7 @@ function RENDER_USERS_ITEM(v,arg){
             var last_msg = CryptoJS.AES.decrypt(v.last_msg, v.public_key).toString(CryptoJS.enc.Utf8).replace("<br>", "");
           }catch(e){
             var last_msg = CryptoJS.AES.decrypt(v.last_msg, KEY).toString(CryptoJS.enc.Utf8).replace("<br>", "");
-          }
-          if (last_msg == ''){
+          }if (last_msg == ''){
             var last_msg = CryptoJS.AES.decrypt(v.last_msg, KEY).toString(CryptoJS.enc.Utf8).replace("<br>", "");
           }
       }
@@ -932,6 +936,7 @@ function CREATE_GROUP_SERVER(){
                 console.log(result)
 
                 NOTY(3000, 'success',LANG[0].success[0].success_create_group)
+
                 $('#scrims_chat_contact_list').prepend(`<div class="row sideBar-body scrims_chat_companion" data-init="${result.init}" data-group="true">
                                                       <div class="col-sm-2 col-xs-2 sideBar-avatar">
                                                         <div class="avatar-icon avatar-icon-active">
@@ -959,6 +964,7 @@ function CREATE_GROUP_SERVER(){
                 $('#name_create_group').val('')
                 NOTY(3000, 'error',LANG[0].error[0].error_group_exist)
               }
+
           }
         })
 
@@ -1011,30 +1017,19 @@ function CREATE_GROUP(){
 
     if(e.keyCode == 13){
       $('.scrims_chat_companion:first').click()
-    }
-
-    users_ = USERS.filter(a => a.group == false)
-    groups_ = USERS.filter(a => a.group == true)
-
-    var data = $(this).val()
-    function filtration(text){
-      var a = text.slice(0,data.length)
-      return (a.toLowerCase())
+      $('#scrims_chat_textarea').focus()
     }
 
 
-    var users = users_.filter(a => filtration(a.search[0]) == data.toLowerCase() || filtration(a.search[1]) == data.toLowerCase() || filtration(a.search[2]) == data.toLowerCase())
-    if(users == ''){
-      var users = users_.filter(a => filtration(a.name) == data.toLowerCase())
+    if($(this).val().length>2){
+      MAIN_AJAX_GET('/api/search-users/'+$(this).val()+'/').then(function(users){
+            $('#scrims_chat_contact_list').empty()
+            RENDER_USERS(users)
+      })
+    }else{
+      $('#scrims_chat_contact_list').empty()
+      RENDER_USERS(USERS)
     }
-      var groups = groups_.filter(a => filtration(a.search[0]) == data.toLowerCase())
-
-    $('#scrims_chat_contact_list').empty()
-
-
-    RENDER_USERS(users)
-    RENDER_USERS(groups)
-    SELECT_COMPANION_ACTION()
 
   })
 
