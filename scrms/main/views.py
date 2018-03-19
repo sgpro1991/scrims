@@ -245,7 +245,7 @@ def Main(request):
     user_data = User.objects.get(init=user[0]['id'])
     users = User.objects.all().exclude(init=user[0]['id']).order_by('-status')
 
-
+    common_message = []
     ids = []
     for i in user_data.group.all():
         ids.append(i.id)
@@ -255,6 +255,10 @@ def Main(request):
     group_mass = []
     for a in group:
         count = Message.objects.filter(group=a.init,reading_group=user_data).count()
+
+        if count:
+            common_message.append(count)
+
         group_mass.append({
             "search":a.name,
             "id":a.init,
@@ -272,6 +276,9 @@ def Main(request):
     for a in users:
         count = Message.objects.filter(user=a.init,companion=user[0]['id'],reading=False).count()
         last_message = LastMessage.objects.filter(companion_1=a.init,companion_2=user[0]['id']) | LastMessage.objects.filter(companion_1=user[0]['id'],companion_2=a.init)
+
+        if count:
+            common_message.append(count)
         user_mass.append({
             "group":group,
             "search":a.name.split(" "),
@@ -284,8 +291,8 @@ def Main(request):
             "public_key_user":a.public_key_user,
         })
 
-    #print(user_mass)
-    
+    print(len(common_message))
 
-    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':LANG,"group":group_mass})
+
+    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':LANG,"group":group_mass,'common_message':len(common_message)})
     #return render(request,"react/react-home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})

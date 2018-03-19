@@ -149,9 +149,18 @@ def SearchUsers(request,word):
         return HttpResponse(status=403)
 
     user_data = User.objects.get(init=user[0]['id'])
-    group = Group.objects.annotate(
-            search=SearchVector('name'),
-    ).filter(search=word)
+
+    if word != 'all':
+        group = Group.objects.annotate(
+                search=SearchVector('name'),
+        ).filter(search=word)
+
+        users = User.objects.annotate(
+                search=SearchVector('name','dep__name','email'),
+        ).filter(search=word).exclude(init=user[0]['id'])
+    else:
+        group = Group.objects.all()
+        users = User.objects.all().exclude(init=user[0]['id']).order_by('-status')
 
 
     group_mass = []
@@ -177,9 +186,7 @@ def SearchUsers(request,word):
         })
 
 
-    users = User.objects.annotate(
-            search=SearchVector('name','dep__name','email'),
-    ).filter(search=word).exclude(init=user[0]['id'])
+
 
     #users = User.objects.filter(name__search)
 

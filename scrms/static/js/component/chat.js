@@ -32,7 +32,7 @@ function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY){
 
 
 
-  $('#dialog-chat').dialog({
+$('#dialog-chat').dialog({
       autoOpen: false,
       modal: true,
       //width:'100%',
@@ -403,6 +403,12 @@ function PREVIOUS_MESSAGE(id,group){
             $('.scrims_chat_companion').each(function() {
               if($(this).attr('data-init') == id){
                 var count = parseInt($(this).find('.scrims_chat_count_message').remove())
+
+                if($('.scrims_chat_count_message').length == 0){
+                  $('.common-chat-count-message').html('')
+                }else{
+                  $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
+                }
               }
             })
         })
@@ -748,8 +754,16 @@ function PARSER_WEBSOKET_MESSAGE(data,decrypt,type){
 // if user not see recive message while no open contact or close chat
 function MESSAGE_NO_SEE(data,group){
 
+  console.log(data)
+
+  if($('#scrims_chat').hasClass('scrims-chat-hide') == true){
+
+    $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
+  }
+
   //if group
 if(group == true){
+
 
   console.log(data.companion.indexOf(USER_ID),'------>')
 
@@ -799,6 +813,9 @@ if(group == true){
           }
         })
   }
+
+
+
 
 }
 
@@ -1027,8 +1044,10 @@ function CREATE_GROUP(){
             RENDER_USERS(users)
       })
     }else{
-      $('#scrims_chat_contact_list').empty()
-      RENDER_USERS(USERS)
+      MAIN_AJAX_GET('/api/search-users/all/').then(function(users){
+            $('#scrims_chat_contact_list').empty()
+            RENDER_USERS(users)
+      })
     }
 
   })
@@ -1060,6 +1079,24 @@ function CREATE_GROUP(){
 
   })
 }
+
+
+$('#close-scrims-chat,.chat-close-open').click(function(){
+  $('#scrims_chat').toggleClass('scrims-chat-hide')
+
+  $('.chat-close-open').toggleClass('chat-close-open-active')
+
+if($('#scrims_chat').hasClass('scrims-chat-hide')==true){
+  if($('.scrims_chat_count_message').length == 0){
+    $('.common-chat-count-message').html('')
+  }else{
+    $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
+  }
+}
+
+})
+
+
 
 SELECT_COMPANION_ACTION()
 //end actions
