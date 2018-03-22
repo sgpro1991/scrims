@@ -96,8 +96,7 @@ function RENDER_USERS_ITEM(v,arg){
 
 
   if(arg === true){
-
-    $('#scrims_chat_contact_list').append(`<div class="row sideBar-body scrims_chat_companion" data-init="${v.id}" data-group="${v.group}">
+    $('#scrims_chat_contact_list').append(`<div id="user_${v.id}" class="row sideBar-body scrims_chat_companion" data-init="${v.id}" data-group="${v.group}">
         <div class="col-sm-2 col-xs-2 sideBar-avatar">
           ${status}
             <img src="${v.img}" width="50px" height="50px">
@@ -290,17 +289,32 @@ RENDER_USERS(USERS)
 
         $('#scrims_chat_canvas').attr('data-init',id)
 
-        $('#scrims_chat_heading').append(`<div id="scrims_chat_init" class="col-sm-10 col-md-10 col-xs-10 heading-avatar" style="position:absolute;overflow:hidden; top:0;height: 50px;" data-init="${id}" data-public-key="123" data-group="true"></div>`)
+        $('#scrims_chat_heading').append(`<div id="scrims_chat_init" class="col-sm-10 col-md-10 col-xs-10 heading-avatar" style="position:absolute;top:0;height: 50px;" data-init="${id}" data-public-key="123" data-group="true"></div>`)
 
         $.each(users,function(k,v){
           console.log(v)
-            $('#scrims_chat_init').append(`<div  class="col-sm-1 col-md-1 col-xs-1 scrims_chat_companion heading-avatar " data-init="${id}" data-group="false">
-                  <div class="heading-avatar-icon">
-                    <a href="/personal/user/${v[0].id}/" class="heading-name-meta" style="text-align:center"><img src="${v[0].img}"></a>
+            $('#scrims_chat_init').append(`<div style="width:50px;float:right"  class=" scrims_chat_companion heading-avatar " data-init="${id}" data-group="false">
+                  <div class="heading-avatar-icon" data-init="${v[0].id}}">
+                        <div class="btn-group">
+                              <div class="dropdown-toggle dropdown-box" data-toggle="dropdown">
+                                  <div class="heading-name-meta" style="text-align:center"><img src="${v[0].img}"></div>
+                              </div>
+
+                               <ul class="dropdown-menu">
+                                 <li><a href="/personal/user/${v[0].id}/"><i class="fa fa-user"></i> ${LANG[0].menu[0].profile}</a></li>
+                                 <li><a href="#" class="select-user-group" data-init="${v[0].id}"><i class="fa fa-pencil"></i> ${LANG[0].chat[0].message}</a></li>
+                               </ul>
+                          </div>
                     </div>
                   </div>
             `)
         })
+
+
+        $('.select-user-group').click(function(){
+          SELECT_COMPANION($(this).attr('data-init'),false)
+        })
+
       GET_HISTORY(id,true)
       })
   }
@@ -756,10 +770,13 @@ function MESSAGE_NO_SEE(data,group){
 
   console.log(data)
 
-  if($('#scrims_chat').hasClass('scrims-chat-hide') == true){
 
-    $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
-  }
+    setTimeout(function(){
+        if($('#scrims_chat').hasClass('scrims-chat-hide') == true){
+          $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
+        }
+    },2000)
+
 
   //if group
 if(group == true){

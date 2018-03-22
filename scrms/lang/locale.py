@@ -10,12 +10,17 @@ RU = [{
     "menu":[{
         "profile":"Профиль",
         "company":"Компания",
+        "disk":"Диск",
+        "chat":"Чат",
+        "tasks":"Задачи",
+        "tape":"Живая лента",
     }],
     "chat":[{
         "previous":"Загрузить более ранние сообщения",
         "create_group":"Создать группу",
         "invite":"Пригласить",
         "name_group":"Имя группы",
+        "message":"Написать",
     }],
     "common":[{
         "save":"Сохранить",
@@ -47,12 +52,17 @@ EN = [{
     "menu":[{
         "profile":"Profile",
         "company":"Company",
+        "disk":"Disk",
+        "chat":"Chat",
+        "tasks":"Tasks",
+        "tape":"Stream",
     }],
     "chat":[{
         "previous":"Show Previous Message",
         "create_group":"Create group",
         "invite":"To invite",
         "name_group":"Name group",
+        "message":"Send message",
     }],
     "common":[{
         "save":"Save",

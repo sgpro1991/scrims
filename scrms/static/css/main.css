@@ -486,7 +486,7 @@ padding: 20px 20px; */}
   display: none;
 }
 
-.chat-close-open{
+.chat-close-open-style{
   border:1px solid #999;
   text-align: center;
   border-radius:50%;
@@ -893,6 +893,16 @@ box-shadow: 0 0px 0px 2px #4ecb54;
      padding: 10px !important;
      cursor: pointer;
    }
+
+.gn-menu li span{
+  display: inline;
+  font-family: 'Lato', Arial, sans-serif;
+  font-size: 21px;
+  margin: 0px 10px;
+}
+.gn-menu li a{
+  padding: 20px 0px;
+}
 
    .previous a {
      text-decoration: none;

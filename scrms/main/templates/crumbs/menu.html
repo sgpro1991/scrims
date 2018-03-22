@@ -6,17 +6,22 @@
       <nav class="gn-menu-wrapper">
         <div class="gn-scroller">
           <ul class="gn-menu">
-            <li class="gn-search-item">
-              <input placeholder="Search" type="search" class="gn-search">
-              <a class="gn-icon gn-icon-search"><span>Search</span></a>
+            <li>
+              <a class="gn-icon fa fa-newspaper-o fa-2x"><span>{{lang.0.menu.0.tape}}</span></a>
             </li>
             <li>
-              <a class="gn-icon gn-icon-download">Downloads</a>
-              <ul class="gn-submenu">
-                <li><a class="gn-icon gn-icon-illustrator">Vector Illustrations</a></li>
-                <li><a class="gn-icon gn-icon-photoshop">Photoshop files</a></li>
-              </ul>
+              <a class="gn-icon fa fa-tasks fa-2x"><span>{{lang.0.menu.0.tasks}}</span></a>
             </li>
+            <li>
+              <a class="gn-icon fa fa-comments-o fa-2x chat-close-open"><span>{{lang.0.menu.0.chat}}</span></a>
+            </li>
+            <li>
+              <a class="gn-icon fa fa-hdd-o fa-2x"><span>{{lang.0.menu.0.disk}}</span></a>
+            </li>
+            <li>
+              <a class="gn-icon fa 	fa fa-building-o fa-2x"><span>{{lang.0.menu.0.company}}</span></a>
+            </li>
+
             <li><a class="gn-icon gn-icon-cog">Settings</a></li>
             <li><a class="gn-icon gn-icon-help">Help</a></li>
             <li>
@@ -34,7 +39,15 @@
     <li><b>SCRIMS</b></li>
 
     <li>
-        <div class="btn-group">
+
+   <div class="dropdown-box" >
+      <a href="/personal/user/{{user.init}}/">{% thumbnail user.image "50x50" crop="center" as im %}
+        <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+        {{user.name}}
+      {% endthumbnail %}</a>
+   </div>
+
+        <!--<div class="btn-group">
            <div class="dropdown-toggle dropdown-box" data-toggle="dropdown">
                 {% thumbnail user.image "50x50" crop="center" as im %}
                   <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
@@ -47,7 +60,7 @@
            <ul class="dropdown-menu">
              <li><a href="/personal/user/{{user.id}}/">{{lang.0.menu.0.profile}}</a></li>
            </ul>
-         </div>
+         </div>-->
     </li>
   </ul>
 </div>
