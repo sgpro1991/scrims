@@ -8,7 +8,8 @@
   <div id="dialog-chat-content"></div>
 </div>
 
-<div id="scrims_chat" class="container app scrims-chat-hide">
+<!--<div id="scrims_chat" class="container app scrims-chat-hide">-->
+<div id="scrims_chat" class="container app">
   <div class="row app-one">
     <div class="col-sm-4 side">
       <div class="side-one">
@@ -149,8 +150,20 @@
         <!--<div class="col-sm-1 col-xs-1 reply-recording">
           <i class="fa fa-microphone fa-2x" aria-hidden="true"></i>
         </div>-->
-        <div class="col-sm-1 col-xs-1 reply-send reply-emojis">
-          <i class="fa fa-smile-o fa-2x"></i>
+
+
+        <div  class="col-sm-1 col-xs-1 reply-send reply-emojis ">
+          <div class="emoji-box" style="">
+
+            <span class="emoji-item col-sm-1 col-xs-1" data-init=":-)"><img src="/static/smiles/20/smile.gif"/></span>
+            <span class="emoji-item col-sm-1 col-xs-1" data-init=":-("><img src="/static/smiles/20/sad.gif"/></span>
+            <span class="emoji-item col-sm-1 col-xs-1" data-init="(cool)" ><img src="/static/smiles/20/cool.gif"/></span>
+            <span class="emoji-item col-sm-1 col-xs-1" data-init=":-D" ><img src="/static/smiles/20/laugh.gif"/></span>
+          </div>
+
+
+          <i id="scrims-emoji" class="fa fa-smile-o fa-2x"></i>
+
         </div>
         <div class="col-sm-1 col-xs-2 reply-send reply-emojis" id="scrims_chat_send">
           <i class="fa fa-send fa-2x" aria-hidden="true"  ></i>

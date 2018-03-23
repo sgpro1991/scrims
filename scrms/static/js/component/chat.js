@@ -583,8 +583,13 @@ function SEND_MESSAGE(id_user,id_companion,type,message,img,group){
   let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
   if(msg === ''){return false}
   message = message.replace(/\n/g, "<br>")
+
   //smiles
-  //message = message.replace(/=)/g, "<br>")
+  message = message.replace(/:-\)/g, ' <img src="/static/smiles/40/smile.gif"> ')
+  message = message.replace(/:-\(/g, ' <img src="/static/smiles/40/sad.gif"> ')
+  message = message.replace(/\(cool\)/g, ' <img src="/static/smiles/40/cool.gif"> ')
+  message = message.replace(/:-D/g, ' <img src="/static/smiles/40/laugh.gif"> ')
+
 
   var public_key = $('#scrims_chat_init').attr('data-public-key')
 
@@ -887,6 +892,23 @@ socket.on('msg readed',data=>MSG_READED(data))
 
 
 
+  $('#scrims-emoji').click(function(){
+    $('.emoji-box').toggleClass('emoji-box-active')
+  })
+
+
+
+   $('#scrims_chat_textarea').on("focus",function(){
+           $('.emoji-box').removeClass('emoji-box-active')
+   })
+
+  $('.emoji-item').click(function(){
+      $('#scrims_chat_textarea').val(($('#scrims_chat_textarea').val()+' '+$(this).attr('data-init')))
+      $('#scrims_chat_textarea').focus()
+  })
+
+
+
   $('#scrims_chat_send').on('click',function(e){
       var img = $('#scrims_chat_init').find('img').attr('src')
 
@@ -903,6 +925,8 @@ socket.on('msg readed',data=>MSG_READED(data))
       }else{
           SEND_MESSAGE( USER_ID, $('#scrims_chat_init').attr('data-init'), 'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
       }
+
+      $('.emoji-box').removeClass('emoji-box-active')
   })
 
 
@@ -919,11 +943,9 @@ socket.on('msg readed',data=>MSG_READED(data))
             var group = false
         }
         var companion = $('#scrims_chat_init').attr('data-init')
-
-
         SEND_MESSAGE( USER_ID, companion,'text',$('#scrims_chat_textarea').val(),USER_IMG,group)
-
       }
+          $('.emoji-box').removeClass('emoji-box-active')
   });
 
 

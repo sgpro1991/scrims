@@ -486,6 +486,23 @@ padding: 20px 20px; */}
   display: none;
 }
 
+.emoji-box{
+  width: 200px;
+  height: 300px;
+  position: absolute;
+  background: #ececec;
+  top: -320px;
+  left: -150px;
+  padding:10px;
+  display: none;
+}
+
+.emoji-box-active{
+  display: block !important;
+}
+
+
+
 .chat-close-open-style{
   border:1px solid #999;
   text-align: center;
