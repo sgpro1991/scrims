@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from scrms.settings import BASE_DIR,LANG,MEDIA_ROOT,MEDIA_URL
-from users.models import User,Storage,Message,LastMessage,Group,Membership
+from users.models import User,Storage,Message,LastMessage,Group,Membership,Post
 from django.utils.crypto import get_random_string
 import os
 import json

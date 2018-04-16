@@ -293,11 +293,11 @@ RENDER_USERS(USERS)
 
         $.each(users,function(k,v){
           console.log(v)
-            $('#scrims_chat_init').append(`<div style="width:50px;float:right"  class=" scrims_chat_companion heading-avatar " data-init="${id}" data-group="false">
+            $('#scrims_chat_init').append(`<div  class=" scrims_chat_companion scrims_chat_companion_group  heading-avatar " data-init="${id}" data-group="false">
                   <div class="heading-avatar-icon" data-init="${v[0].id}}">
                         <div class="btn-group">
                               <div class="dropdown-toggle dropdown-box" data-toggle="dropdown">
-                                  <div class="heading-name-meta" style="text-align:center"><img src="${v[0].img}"></div>
+                                  <div class="heading-name-meta" style="text-align:center"><img class="avatar-group" src="${v[0].img}"></div>
                               </div>
 
                                <ul class="dropdown-menu">
@@ -312,6 +312,7 @@ RENDER_USERS(USERS)
 
 
         $('.select-user-group').click(function(){
+          $('.scrims_chat_companion').removeClass('cleanstate_chat_companion')
           SELECT_COMPANION($(this).attr('data-init'),false)
         })
 

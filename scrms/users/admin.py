@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import User, Message, Storage, LastMessage, Group, Membership, Departament
+from .models import User, Message, Storage, LastMessage, Group, Membership, Departament,Post
 from main.views import Crypto
 from django.utils.crypto import get_random_string
 from sorl.thumbnail import get_thumbnail
@@ -41,6 +41,7 @@ admin.site.register(Membership)
 admin.site.register(LastMessage)
 admin.site.register(Message)
 admin.site.register(Storage)
+admin.site.register(Post)
 admin.site.register(User,UserAdmin)
 admin.site.register(Group)
 # Register your models here.

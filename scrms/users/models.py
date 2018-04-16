@@ -85,6 +85,8 @@ class LastMessage(models.Model):
 
 
 
+
+
 class Storage(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     type_file = models.CharField(max_length=255)
@@ -94,3 +96,38 @@ class Storage(models.Model):
     url = models.CharField(max_length=255)
     date = models.DateTimeField(null=True)
     cache = models.CharField(max_length=255,null=True)
+
+
+
+
+
+
+class Likes(models.Model):
+    TYPE_CHOICES = (
+        ('1', 'post'),
+        ('2', 'comment'),
+    )
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    type_like = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False,blank=True)
+    post_likes = models.CharField(max_length=255)
+
+
+class Views(models.Model):
+    user = models.ForeignKey(User,on_delete=models.CASCADE)
+    post_views = models.CharField(max_length=255)
+
+
+class Comment(models.Model):
+    creator = models.ForeignKey(User,on_delete=models.CASCADE)
+    text = models.TextField(blank=True)
+    date = models.DateTimeField()
+
+
+class Post(models.Model):
+    creator = models.ForeignKey(User,on_delete=models.CASCADE,null=True)
+    title = models.CharField(max_length=255)
+    text = models.TextField()
+    comment = models.ForeignKey(Comment,on_delete=models.CASCADE,blank=True,null=True)
+    likes = models.ForeignKey(Likes,on_delete=models.CASCADE,blank=True,null=True)
+    views = models.ForeignKey(Views,on_delete=models.CASCADE,blank=True,null=True)
+    date = models.DateTimeField()

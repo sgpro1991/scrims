@@ -44,7 +44,7 @@
    <div class="dropdown-box" >
       <a href="/personal/user/{{user.init}}/">{% thumbnail user.image "50x50" crop="center" as im %}
         <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
-        {{user.name}}
+        <span class="name-user">{{user.name}}</span>
       {% endthumbnail %}</a>
    </div>
 

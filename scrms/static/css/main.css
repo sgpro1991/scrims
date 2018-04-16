@@ -500,8 +500,21 @@ padding: 20px 20px; */}
 .emoji-box-active{
   display: block !important;
 }
+#feed{
+      margin: 100px;
+}
+.badge{
+  background: #ff6565 !important;
+}
 
-
+.scrims_chat_companion_group{
+  width: 35px;
+  float: right;
+}
+.avatar-group{
+  width: 25px !important;
+  height: 25px !important;
+}
 
 .chat-close-open-style{
   border:1px solid #999;
@@ -570,12 +583,13 @@ box-shadow: 0 0px 0px 2px #4ecb54;
 }
 
    .app {
-     position: relative;
+     position: fixed;
      overflow: hidden;
      top: 119px;
      height: 600px;
      margin: auto;
      padding: 0;
+     z-index: 9;
      box-shadow: 0 1px 1px 0 rgba(0, 0, 0, .06), 0 2px 5px 0 rgba(0, 0, 0, .2);
    }
 
@@ -1090,7 +1104,11 @@ box-shadow: 0 0px 0px 2px #4ecb54;
 
 
 
-   @media screen and (max-width: 700px) {
+@media screen and (max-width: 700px) {
+
+  .name-user{
+    display: none;
+  }
 
  .message-main-receiver {
      max-width: 75%;
