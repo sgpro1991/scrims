@@ -236,10 +236,13 @@ def AuthForm(request):
 
 def Main(request):
     user = CheckAuth(request)
-
-
     if user == False:
         return redirect('/auth/')
+
+
+    #posts
+    posts = Post.objects.all().order_by('-date')[:10]
+    print(posts)
 
 
     user_data = User.objects.get(init=user[0]['id'])

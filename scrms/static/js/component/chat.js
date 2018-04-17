@@ -24,7 +24,7 @@ console.log(s2)
 
 
 
-function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY){
+function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY,chat_crypt){
 
 
 
@@ -86,6 +86,7 @@ function RENDER_USERS_ITEM(v,arg){
           }catch(e){
             var last_msg = CryptoJS.AES.decrypt(v.last_msg, KEY).toString(CryptoJS.enc.Utf8).replace("<br>", "");
           }if (last_msg == ''){
+
             var last_msg = CryptoJS.AES.decrypt(v.last_msg, KEY).toString(CryptoJS.enc.Utf8).replace("<br>", "");
           }
       }
@@ -443,21 +444,33 @@ function PREVIOUS_MESSAGE(id,group){
     var messages_read = []
 
     $.each(result.reverse(),function(k,v){
-
+      console.log(v)
         if(v.message=='recive'){
           messages_read.push(v.id) // статус прочитанных сообщений
           var cls_mess = 'receiver'
             if(group == 1){
-              var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+              if(v.crypting == true){
+                var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+              }else{
+                var decrypt = v.body
+              }
             }else{
-              var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
+              if(v.crypting == true){
+                var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
+              }else{
+                var decrypt = v.body
+              }
             }
           //var decrypt = CryptoJS.AES.decrypt(v.body,KEY).toString(CryptoJS.enc.Utf8);
           var img = '<img src="'+v.img+'" style="width:30px;height:30px;border-radius:50%;position:absolute;left:-50px;top: -25px;"/>'
 
         }else {
           var cls_mess = 'sender'
-          var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+          if(v.crypting == true){
+            var decrypt = CryptoJS.AES.decrypt(v.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+          }else{
+            var decrypt = v.body
+          }
           var img = '<img src="'+v.img+'" style="width:30px;height:30px;border-radius:50%;position:absolute;right:-50px;top: -25px;"/>'
 
         }
@@ -594,15 +607,17 @@ function SEND_MESSAGE(id_user,id_companion,type,message,img,group){
 
   var public_key = $('#scrims_chat_init').attr('data-public-key')
 
+  if(chat_crypt==true){
+    var crypt_msg = CryptoJS.AES.encrypt(message,public_key).toString();
+    var triger_msg = 1
+  }else{
+    var crypt_msg = message
+    var triger_msg = 0
+  }
 
-  let crypt_msg = CryptoJS.AES.encrypt(message,public_key).toString();
-  let decrypt = CryptoJS.AES.decrypt(crypt_msg,public_key).toString(CryptoJS.enc.Utf8);
-
-
-  console.log(crypt_msg,"------crypt-------",decrypt)
 
   let date = moment().format('YYYY-MM-DD HH:mm:ss')
-  let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":crypt_msg,"date":date,"csrfmiddlewaretoken":csrf_token,"img":img}
+  let msg_object = {"user":id_user,"companion":id_companion,"type":type,"body":crypt_msg,"triger_msg":triger_msg,"date":date,"csrfmiddlewaretoken":csrf_token,"img":img}
 
   if (SEND_AJAX_MESSAGE(msg_object,Number(group))==false){return false}
   SCROLL_TO_BOTTOM()
@@ -693,13 +708,18 @@ function READED_MSG(id_msg){
 
 function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 ///// GROUPS
+console.log(data,'==PARSER_RECIVE_AND_SENDER_MESSAGE==')
   if(data.group != ''){
 
       //Парсим сообщение группы которое пришло нам т.е. reciver
       if(data.companion.indexOf(USER_ID)!=-1){
         if($('#scrims_chat_canvas').attr('data-init') === data.group){
 
-          let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+          if(data.crypting == true){
+            var decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+          }else{
+            var decrypt = data.body
+          }
           PARSER_WEBSOKET_MESSAGE(data,decrypt,'receiver')
           $('.heading-typing').fadeOut(200)
           SCROLL_TO_BOTTOM()
@@ -707,7 +727,11 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
 
         }
       }else if(USER_ID === data.user ){
-        let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+        if(data.crypting == true){
+          var decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+        }else{
+          var decrypt = data.body
+        }
         PARSER_WEBSOKET_MESSAGE(data,decrypt,'sender')
         SCROLL_TO_BOTTOM()
       }
@@ -721,7 +745,11 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
   // Парсим сообщение которое пришло нам т.е. reciver
   if(data.companion === USER_ID && $('#scrims_chat_canvas').attr('data-init') === data.user){
 
-    let decrypt = CryptoJS.AES.decrypt(data.body,KEY).toString(CryptoJS.enc.Utf8);
+        if(data.crypting == true){
+          var decrypt = CryptoJS.AES.decrypt(data.body,KEY).toString(CryptoJS.enc.Utf8);
+        }else{
+          var decrypt = data.body
+        }
         PARSER_WEBSOKET_MESSAGE(data,decrypt,'receiver')
         $('.heading-typing').fadeOut(200)
         SCROLL_TO_BOTTOM()
@@ -730,7 +758,11 @@ function PARSER_RECIVE_AND_SENDER_MESSAGE(data){
   }  // Парсим сообщение которое мы отправили
   else if(data.user === USER_ID && $('#scrims_chat_canvas').attr('data-init') === data.companion){
 
-        let decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+      if(data.crypting == true){
+        var decrypt = CryptoJS.AES.decrypt(data.body,$('#scrims_chat_init').attr('data-public-key')).toString(CryptoJS.enc.Utf8);
+      }else{
+        var decrypt = data.body
+      }
         PARSER_WEBSOKET_MESSAGE(data,decrypt,'sender')
         SCROLL_TO_BOTTOM()
 
@@ -773,8 +805,6 @@ function PARSER_WEBSOKET_MESSAGE(data,decrypt,type){
 
 // if user not see recive message while no open contact or close chat
 function MESSAGE_NO_SEE(data,group){
-
-  console.log(data)
 
 
     setTimeout(function(){

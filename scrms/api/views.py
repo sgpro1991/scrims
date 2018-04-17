@@ -231,6 +231,13 @@ def SendMessage(request):
     companion = request.POST.get('companion',False)
     type_msg = request.POST.get('type',False)
     date = request.POST.get('date',False)
+    triger_msg = request.POST.get('triger_msg','')
+
+
+    if triger_msg == '1':
+        crypt_msg = True
+    else:
+        crypt_msg = False
 
     if companion and type_msg and date:
         if companion == "NaN":
@@ -270,7 +277,9 @@ def SendMessage(request):
                                  type_msg='1',
                                  date=date,
                                  img = im.url,
-                                 delivered=True)
+                                 delivered=True,
+                                 crypting=crypt_msg,
+                                 )
                 companion = users_mass
                 group = group.init
                 insert.save()
@@ -284,7 +293,8 @@ def SendMessage(request):
                                  type_msg='1',
                                  date=date,
                                  img = im.url,
-                                 delivered=True)
+                                 delivered=True,
+                                 crypting=crypt_msg,)
                 group = ''
                 insert.save()
 
@@ -297,6 +307,7 @@ def SendMessage(request):
                     "type":type_msg,
                     "id_msg":str(insert.id),
                     "img":im.url,
+                    "crypting":crypt_msg,
                     }
             return HttpResponse(json.dumps(json_resp))
 
@@ -556,7 +567,8 @@ def AsembleHistory(data,companion,group,request,user_auth):
             'message':message,
             'date':str(a.date),
             'delivered':a.delivered,
-            'reading':a.reading
+            'reading':a.reading,
+            'crypting':a.crypting,
         })
     return mass
 

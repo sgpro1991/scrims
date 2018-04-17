@@ -72,6 +72,7 @@ class Message(models.Model):
     delivered = models.BooleanField(default=False)
     reading = models.BooleanField(default=False)
     reading_group = models.ManyToManyField(User,blank=True)
+    crypting = models.BooleanField(default=False)
 
 
 
@@ -127,7 +128,7 @@ class Post(models.Model):
     creator = models.ForeignKey(User,on_delete=models.CASCADE,null=True)
     title = models.CharField(max_length=255)
     text = models.TextField()
-    comment = models.ForeignKey(Comment,on_delete=models.CASCADE,blank=True,null=True)
-    likes = models.ForeignKey(Likes,on_delete=models.CASCADE,blank=True,null=True)
-    views = models.ForeignKey(Views,on_delete=models.CASCADE,blank=True,null=True)
+    comment = models.ManyToManyField(Comment,blank=True)
+    likes = models.ManyToManyField(Likes,blank=True)
+    views = models.ManyToManyField(Views,blank=True)
     date = models.DateTimeField()

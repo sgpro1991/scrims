@@ -109,6 +109,9 @@ var USERS = [{% for item in users  %}
               ]
 
 //config
+
+
+
 moment.locale("ru");
 var socket = io.connect({secure: true});
 var csrf_token = "{{csrf_token}}"
@@ -164,8 +167,9 @@ var NOTY = function (timeout,type,text){
 $(document).ready(function(){
 
   notifyMe()
-
-  CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY)
+  var chat_crypt = true
+  //var chat_crypt = false
+  CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY,chat_crypt)
 })
 
 
