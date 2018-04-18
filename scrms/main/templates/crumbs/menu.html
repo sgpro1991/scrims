@@ -1,4 +1,5 @@
 {% load thumbnail %}
+
 <div class="container">
   <ul id="gn-menu" class="gn-menu-main">
     <li class="gn-trigger">
@@ -13,7 +14,14 @@
               <a class="gn-icon fa fa-tasks fa-2x"><span>{{lang.0.menu.0.tasks}}</span></a>
             </li>
             <li>
-              <a class="gn-icon fa fa-comments-o fa-2x chat-close-open"><span>{{lang.0.menu.0.chat}}</span></a>
+              <a class="gn-icon fa fa-comments-o fa-2x chat-close-open"><span>{{lang.0.menu.0.chat}}</span>
+
+                <div class="common-chat-count-message">
+                  {% if common_message != 0 %}
+                  <span id="common-chat-count-message" class="badge">{{common_message}}</span>
+                  {% endif %}
+                </div>
+                  </a>
             </li>
             <li>
               <a class="gn-icon fa fa-hdd-o fa-2x"><span>{{lang.0.menu.0.disk}}</span></a>

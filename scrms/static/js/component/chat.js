@@ -423,7 +423,7 @@ function PREVIOUS_MESSAGE(id,group){
                 if($('.scrims_chat_count_message').length == 0){
                   $('.common-chat-count-message').html('')
                 }else{
-                  $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
+                  $('.common-chat-count-message').html(`<span id="common-chat-count-message" class="badge">${$('.scrims_chat_count_message').length}</span>`)
                 }
               }
             })
@@ -807,11 +807,7 @@ function PARSER_WEBSOKET_MESSAGE(data,decrypt,type){
 function MESSAGE_NO_SEE(data,group){
 
 
-    setTimeout(function(){
-        if($('#scrims_chat').hasClass('scrims-chat-hide') == true){
-          $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
-        }
-    },2000)
+
 
 
   //if group
@@ -868,6 +864,10 @@ if(group == true){
   }
 
 
+
+      if($('#scrims_chat').hasClass('scrims-chat-hide') == true){
+        $('.common-chat-count-message').html(`<span id="common-chat-count-message" class="badge">${$('.scrims_chat_count_message').length}</span>`)
+      }
 
 
 }
@@ -1143,7 +1143,7 @@ function CREATE_GROUP(){
     $('#reply-to-chat').click(function(){
       $('#scrims_chat_canvas,#scrims_chat_heading').empty()
       $('.conversation').removeClass('active_chat_conversation')
-
+      $('.scrims_chat_companion').removeClass('cleanstate_chat_companion')
     })
 
 
@@ -1153,14 +1153,14 @@ function CREATE_GROUP(){
 
 $('#close-scrims-chat,.chat-close-open').click(function(){
   $('#scrims_chat').toggleClass('scrims-chat-hide')
-
+  $('#scrims-chat-box').toggleClass('scrims-chat-hide')
   $('.chat-close-open').toggleClass('chat-close-open-active')
 
 if($('#scrims_chat').hasClass('scrims-chat-hide')==true){
   if($('.scrims_chat_count_message').length == 0){
     $('.common-chat-count-message').html('')
   }else{
-    $('.common-chat-count-message').html(`<br><span id="common-chat-count-message-id" class="badge">${$('.scrims_chat_count_message').length}</span>`)
+    $('.common-chat-count-message').html(`<span id="common-chat-count-message" class="badge">${$('.scrims_chat_count_message').length}</span>`)
   }
 }
 

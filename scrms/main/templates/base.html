@@ -6,21 +6,24 @@
     {% include 'crumbs/menu.html' %}
 
 
-    <div id="feed">
-    {% include 'crumbs/stream.html' %}
-    </div>
-
     <div class="container">
+    {% include 'crumbs/stream.html' %}
+
+
+
 
       <!--[if lte IE 9]>
           <p class="browserupgrade">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience and security.</p>
       <![endif]-->
       <!-- Add your site or application content here -->
-      {% include 'crumbs/chat.html' %}
+
 
       {% block content %}
       {% endblock %}
     </div>
+        <div id="scrims-chat-box" class="container box-chat scrims-chat-hide" style="">
+          {% include 'crumbs/chat.html' %}
+        </div>
     </body>
         {% include 'crumbs/footer.html' %}
 </html>

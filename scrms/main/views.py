@@ -297,5 +297,11 @@ def Main(request):
     print(len(common_message))
 
 
-    return render(request,"home.html",{'user':user_data,'users':user_mass,'lang':LANG,"group":group_mass,'common_message':len(common_message)})
+    return render(request,"home.html",{'user':user_data,
+                                       'users':user_mass,
+                                       'lang':LANG,
+                                       'group':group_mass,
+                                       'common_message':len(common_message),
+                                       'posts':posts,
+                                       })
     #return render(request,"react/react-home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})
