@@ -915,7 +915,7 @@ box-shadow: 0 0px 0px 2px #4ecb54;
   top: 0;
 }
    .message {
-     padding: 75px 0 !important;
+     padding: 65px 0 !important;
      margin: 0 !important;
      /* background: url(w.jpg) no-repeat fixed center; */
      background-size: cover;
@@ -1128,6 +1128,10 @@ box-shadow: 0 0px 0px 2px #4ecb54;
 
 
 @media screen and (max-width: 700px) {
+
+  .message {
+    padding: 15px 0 !important;
+  }
 
   .name-user{
     display: none;

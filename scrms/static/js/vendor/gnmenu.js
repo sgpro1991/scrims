@@ -55,6 +55,24 @@
 
 					$('.sideBar').css({'height':$(window).height()-130})
 					$('.message').css({'height':$(window).height()-120})
+
+					$('#scrims_chat_textarea').focus(function(){
+						if($('#scrims_chat_textarea').is(":focus") == true){
+								$('.message').css({'height':($(window).height()-375)})
+						}
+					})
+
+
+					$('#scrims_chat_textarea').focusout(function(){
+						$('.message').css({'height':($(window).height()-120),'padding':''})
+					})
+
+
+
+					$(window).on('click blur focus',function(){
+						$('.message').css({'height':$(window).height()-120,'padding':''})
+					})
+
 			}
 			this.trigger.addEventListener( this.eventtype, function( ev ) {
 				ev.stopPropagation();
