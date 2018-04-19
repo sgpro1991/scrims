@@ -333,7 +333,9 @@ def SendMessage(request):
                                  type_msg='2',
                                  date=date,
                                  img = im.url,
-                                 delivered=True)
+                                 delivered=True,
+                                 crypting=crypt_msg,
+                                 )
                 companion = users_mass
                 group = group.init
                 insert.save()
@@ -347,7 +349,9 @@ def SendMessage(request):
                                  type_msg='2',
                                  date=date,
                                  img=im.url,
-                                 delivered=True)
+                                 delivered=True,
+                                 crypting=crypt_msg,
+                                 )
                 group = ''
                 insert.save()
             #last_msg(insert,user,companion,type_msg)
@@ -358,7 +362,8 @@ def SendMessage(request):
                         "date":date,
                         "type":type_msg,
                         "id_msg":str(insert.id),
-                        "img":im.url
+                        "img":im.url,
+                        "crypting":crypt_msg,
                         }
             return HttpResponse(json.dumps(json_resp))
 

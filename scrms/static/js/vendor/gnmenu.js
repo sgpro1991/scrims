@@ -43,34 +43,42 @@
 
 			if( !mobilecheck() ) {
 
-				this.trigger.addEventListener( 'mouseover', function(ev) { self._openIconMenu(); } );
+				/*this.trigger.addEventListener( 'mouseover', function(ev) { self._openIconMenu(); } );
 				this.trigger.addEventListener( 'mouseout', function(ev) { self._closeIconMenu(); } );
 
 				this.menu.addEventListener( 'mouseover', function(ev) {
 					self._openMenu();
 					document.addEventListener( self.eventtype, self.bodyClickFn );
-				} );
+				} );*/
 				classie.add( this.menu, 'gn-open-part' );
 			}else{
 
+					var width_window = $(window).height()
 					$('.sideBar').css({'height':$(window).height()-130})
 					$('.message').css({'height':$(window).height()-120})
 
-					$('#scrims_chat_textarea').focus(function(){
-						if($('#scrims_chat_textarea').is(":focus") == true){
-								$('.message').css({'height':($(window).height()-375)})
-						}
+					$('#scrims_chat_textarea').on('focus',function(){
+
+						$('.message').css({'height':(width_window-375)})
+
+
 					})
 
-
+					/*
 					$('#scrims_chat_textarea').focusout(function(){
 						$('.message').css({'height':($(window).height()-120),'padding':''})
+					})*/
+
+					$('#scrims_chat_send').on('click',function(e){
+							e.preventDefault();
+							$('#scrims_chat_textarea').focus();
+							$('.emoji-box').removeClass('emoji-box-active')
+
 					})
 
 
-
-					$(window).on('click blur focus',function(){
-						$('.message').css({'height':$(window).height()-120,'padding':''})
+					$('.message,.heading').on('click',function(){
+							$('.message').css({'height':(width_window-120)})
 					})
 
 			}

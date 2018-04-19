@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 from django.http import HttpResponse
 from django.utils.crypto import get_random_string
 from scrms.settings import BASE_DIR,LANG,MEDIA_ROOT,MEDIA_URL
-from users.models import User,Storage,Message,LastMessage,Group,Membership,Post
+from users.models import User,Storage,Message,LastMessage,Group,Membership,Post,Views,Likes,Comment
 from django.utils.crypto import get_random_string
 import os
 import json
@@ -240,9 +240,23 @@ def Main(request):
         return redirect('/auth/')
 
 
-    #posts
+    posts_mass = []
+
     posts = Post.objects.all().order_by('-date')[:10]
-    print(posts)
+
+    for a in posts:
+        likes = Likes.objects.filter(post_init=int(a.id)).count()
+        views = Views.objects.filter(post_init=int(a.id)).count()
+        comments = Comment.objects.filter(post_init=int(a.id))
+        posts_mass.append({
+            'creator':a.creator,
+            'title':a.title,
+            'text':a.text,
+            'likes':likes,
+            'views':views,
+            'date':a.date,
+            'comments':comments,
+        })
 
 
     user_data = User.objects.get(init=user[0]['id'])
@@ -302,6 +316,6 @@ def Main(request):
                                        'lang':LANG,
                                        'group':group_mass,
                                        'common_message':len(common_message),
-                                       'posts':posts,
+                                       'posts':posts_mass,
                                        })
     #return render(request,"react/react-home.html",{'user':user_data,'users':user_mass,'lang':str(LANG)})

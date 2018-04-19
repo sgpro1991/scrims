@@ -110,19 +110,19 @@ class Likes(models.Model):
     )
     user = models.ForeignKey(User,on_delete=models.CASCADE)
     type_like = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False,blank=True)
-    post_init = models.IntegerField(max_length=255)
+    post_init = models.IntegerField()
 
 
 class Views(models.Model):
     user = models.ForeignKey(User,on_delete=models.CASCADE)
-    post_init = models.IntegerField(max_length=255)
+    post_init = models.IntegerField()
 
 
 class Comment(models.Model):
     creator = models.ForeignKey(User,on_delete=models.CASCADE)
     text = models.TextField(blank=True)
     date = models.DateTimeField()
-    post_init = models.IntegerField(max_length=255)
+    post_init = models.IntegerField()
 
 
 class Post(models.Model):

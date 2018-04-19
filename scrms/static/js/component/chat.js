@@ -27,11 +27,6 @@ console.log(s2)
 function CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY,chat_crypt){
 
 
-
-
-
-
-
 $('#dialog-chat').dialog({
       autoOpen: false,
       modal: true,
@@ -592,7 +587,8 @@ function PREVIOUS_MESSAGE(id,group){
 
 function SEND_MESSAGE(id_user,id_companion,type,message,img,group){
 
-  console.log(id_companion)
+
+
 
   let msg = message.replace(/\n/g, "").replace(/\s/g, "")//strip \n
   if(msg === ''){return false}

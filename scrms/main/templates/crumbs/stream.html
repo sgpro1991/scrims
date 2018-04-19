@@ -14,26 +14,26 @@
           </div>
 
           <div class="col-sm-11 col-xs-11 ">
-            <div style="font-size:16px;color:#5f6f81;font-weight:bold;padding: 10px 0;">Иван Иванов Иванович</div>
+            <div style="font-size:16px;color:#5f6f81;font-weight:bold;padding: 10px 0;">{{item.creator.name}}</div>
             <div class="heading-avatar-icon">
-                <p style="line-height:1.8;">Он будет влиять на вес источника равносильно цитируемости и оперативности. Вовлечённость будет зависеть от доли собственной аудитории сайта-партнёра — количества пользователей, которые приходят на сайт из поиска или по прямой ссылке. Такие читатели, как правило, задерживаются на сайте, чтобы изучить его материалы, и готовы возвращаться туда снова.</p>
+                {{item.text}}
             </div>
           </div>
           <div class="col-sm-12 col-xs-12 " style="color:#5f6f81">
           <div class="col-sm-1 col-xs-1 "></div>
            <div class="col-sm-2 col-xs-2 ">
              <div>
-              <span>12 </span><span class="fa fa-thumbs-up fa-2x"></span>
+              <span>{{item.likes}} </span><span class="fa fa-thumbs-up fa-2x"></span>
              </div>
            </div>
 
            <div class="col-sm-2 col-xs-2">
              <div>
-               <span>34 </span><span class=" fa fa-eye fa-2x"></span>
+               <span>{{item.views}} </span><span class=" fa fa-eye fa-2x"></span>
              </div>
            </div>
            <div class="col-sm-2 col-xs-2 ">
-             <span class=" fa fa-clock-o fa-2x"></span> 12 апр
+             <span class=" fa fa-clock-o fa-2x"></span> {{item.date}}
           </div>
           </div>
        </div>
