@@ -1,4 +1,4 @@
-
+{% load thumbnail %}
 
 <div class="col-sm-1 col-xs-1"></div>
 <div class="col-sm-8 col-xs-10" style="margin:75px 0px">
@@ -9,55 +9,63 @@
 
           <div class="col-sm-1 col-xs-1 heading-avatar">
             <div class="heading-avatar-icon">
-                <img src="/media/cache/1c/b9/1cb969d2b589af0d1bb5b71be2b451eb.jpg" width="70" height="70">
+              {% thumbnail item.creator.image "70x70" crop="center" as im %}
+                  <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+              {% endthumbnail %}
+
             </div>
           </div>
 
           <div class="col-sm-11 col-xs-11 ">
-            <div style="font-size:16px;color:#5f6f81;font-weight:bold;padding: 10px 0;">{{item.creator.name}}</div>
+            <div style="font-size:16px;color:#5f6f81;font-weight:bold;padding: 10px 0;"><a href="/personal/user/{{item.creator.init}}/">{{item.creator.name}}</a></div>
             <div class="heading-avatar-icon">
                 {{item.text}}
             </div>
           </div>
           <div class="col-sm-12 col-xs-12 " style="color:#5f6f81">
           <div class="col-sm-1 col-xs-1 "></div>
-           <div class="col-sm-2 col-xs-2 ">
+           <div class="col-sm-1 col-xs-1 ">
              <div>
-              <span>{{item.likes}} </span><span class="fa fa-thumbs-up fa-2x"></span>
+              <span>{{item.likes}} </span><span class="fa fa-thumbs-up fa-1x"></span>
              </div>
            </div>
 
-           <div class="col-sm-2 col-xs-2">
+           <div class="col-sm-1 col-xs-1">
              <div>
-               <span>{{item.views}} </span><span class=" fa fa-eye fa-2x"></span>
+               <span>{{item.views}} </span><span class=" fa fa-eye fa-1x"></span>
              </div>
            </div>
-           <div class="col-sm-2 col-xs-2 ">
-             <span class=" fa fa-clock-o fa-2x"></span> {{item.date}}
+           <div class="col-sm-4 col-xs-4 ">
+             <span class=" fa fa-clock-o fa-1x"></span> {{item.date}}
           </div>
           </div>
        </div>
 
+       {% if item.comments %}
+              {% for comment in item.comments %}
+                 <!-- coments -->
+                 <div class="row" style="background:#fff;padding:10px;">
+                   <div class="col-sm-1 col-xs-1"></div>
+                   <div class="col-sm-9 col-xs-9">
+                   <div class="col-sm-1 col-xs-1 ">
+                     <div class="heading-avatar-icon">
+                       {% thumbnail comment.creator.image "30x30" crop="center" as im %}
+                           <img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}">
+                       {% endthumbnail %}
+                     </div>
+                   </div>
 
-       <!-- coments -->
-       <div class="row" style="background:#fff;padding:10px;">
-         <div class="col-sm-1 col-xs-1"></div>
-         <div class="col-sm-9 col-xs-9">
-         <div class="col-sm-1 col-xs-1 ">
-           <div class="heading-avatar-icon">
-               <img src="/media/cache/1c/b9/1cb969d2b589af0d1bb5b71be2b451eb.jpg" width="30" height="30">
-           </div>
-         </div>
-
-         <div class="col-sm-11 col-xs-11 ">
-           <div style="font-size:14px;color:#5f6f81;font-weight:bold;padding: 10px 0;">Иван Иванов Иванович</div>
-           <div class="heading-avatar-icon">
-               <p style="line-height:1.5;font-size:13px;">Он будет влиять на вес источника равносильно цитируемости и оперативности. Вовлечённость ,</p>
-           </div>
-         </div>
-        </div>
-      </div>
-     <!-- /coments -->
+                   <div class="col-sm-11 col-xs-11 ">
+                     <div style="font-size:14px;color:#5f6f81;font-weight:bold;padding: 10px 5px;"><a href="/personal/user/{{comment.creator.init}}/">{{comment.creator.name}}</a></div>
+                     <div class="heading-avatar-icon">
+                         {{comment.text}}
+                     </div>
+                   </div>
+                  </div>
+                </div>
+               <!-- /coments -->
+              {% endfor %}
+          {% endif %}
      {% endfor %}
 </div>
 </div>
