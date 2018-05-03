@@ -8,7 +8,7 @@ from random import randint
 def id_generator(size=randint(3, 5), chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
 
-user = 'root'
+user = 'sgpro1991'
 user_pass = 'q1w2e3r4'
 
 driver = webdriver.Chrome('../chromedriver')
@@ -22,7 +22,7 @@ driver.find_elements_by_xpath('//*[@id="login-form"]/div[3]/input')[0].click()
 
 
 
-path = "/home/sgpro1991/scrims/scrms/Ztests-and-bots/addusers/img/"
+path = "/home/sgpro1991/scrims_enviroment/scrims/scrms/Ztests-and-bots/addusers/img/"
 images = os.listdir(path)
 
 print(images)

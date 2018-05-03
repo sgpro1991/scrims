@@ -104,13 +104,11 @@ class Storage(models.Model):
 
 
 class Likes(models.Model):
-    TYPE_CHOICES = (
-        ('1', 'post'),
-        ('2', 'comment'),
-    )
     user = models.ForeignKey(User,on_delete=models.CASCADE)
-    type_like = models.CharField(choices=TYPE_CHOICES, max_length=255, default=False,blank=True)
     post_init = models.IntegerField()
+
+
+
 
 
 class Views(models.Model):
@@ -118,11 +116,13 @@ class Views(models.Model):
     post_init = models.IntegerField()
 
 
+
 class Comment(models.Model):
     creator = models.ForeignKey(User,on_delete=models.CASCADE)
     text = models.TextField(blank=True)
     date = models.DateTimeField()
     post_init = models.IntegerField()
+
 
 
 class Post(models.Model):
@@ -133,3 +133,4 @@ class Post(models.Model):
     likes = models.ManyToManyField(Likes,blank=True)
     views = models.ManyToManyField(Views,blank=True)
     date = models.DateTimeField()
+    users_from = models.TextField()

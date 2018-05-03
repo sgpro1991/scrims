@@ -56,6 +56,7 @@
 
 <!-- components -->
 <script  src="/static/js/component/chat.js"></script>
+<script  src="/static/js/component/stream.js"></script>
 <!-- /components -->
 
 
@@ -170,6 +171,7 @@ $(document).ready(function(){
   var chat_crypt = true
   //var chat_crypt = false
   CHAT(USER_ID,USER_IMG,KEY,USERS,socket,csrf_token,noty,LANG,NOTY,chat_crypt)
+  STREAM()
 })
 
 
