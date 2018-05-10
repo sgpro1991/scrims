@@ -47,7 +47,6 @@ class PostSerializer(serializers.ModelSerializer):
 # ViewSets define the view behavior.
 class UserViewSet(viewsets.ModelViewSet):
     queryset = Post.objects.all()
-    print(queryset)
     serializer_class = PostSerializer
 
 # Routers provide an easy way of automatically determining the URL conf.

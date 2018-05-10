@@ -22,7 +22,7 @@ driver.find_elements_by_xpath('//*[@id="login-form"]/div[3]/input')[0].click()
 
 
 
-path = "/home/sgpro1991/scrims_enviroment/scrims/scrms/Ztests-and-bots/addusers/img/"
+path = "/home/sgpro1991/scrims_env/scrims/scrms/Ztests-and-bots/addusers/img/"
 images = os.listdir(path)
 
 print(images)
