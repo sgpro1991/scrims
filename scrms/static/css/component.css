@@ -306,7 +306,9 @@ input.gn-search:focus {
 
 
 .gn-menu-wrapper.gn-open-all {
-		width: 340px
+		width: 340px;
+		border-right: 1px solid #c6d0da;
+
 }
 
 .gn-menu-wrapper.gn-open-all .gn-submenu li {

@@ -15,14 +15,16 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/aes.min.js"></script>
 <!-- / AES crypto -->
 
-
 <script src="/static/js/vendor/crypto-js/sha256.min.js"></script>
+
+
+
+
 
 
 <!-- dropzone -->
 <script src="/static/js/vendor/dropzone.js"></script>
 <!-- /dropzone -->
-
 
 
 <!-- babel-->
@@ -45,6 +47,13 @@
 <script src="/static/js/plugins.js"></script>
 <script src="/static/js/main.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js"></script>
+
+
+<!-- ckeditor -->
+<script src="/static/ckeditor/ckeditor/ckeditor.js"></script>
+<script src="/static/ckeditor/ckeditor/adapters/jquery.js"></script>
+<!-- /ckeditor -->
+
 
 
 <script src="/static/js/vendor/noty.js"></script>
@@ -105,17 +114,53 @@ var USERS = [{% for item in users  %}
                   "group":true,
                   "last_msg_type":"{{item.last_msg.0.type_msg}}",
                   "status":true,
-                },
+                },$(document).ready(function(){
+
+})
                 {% endfor %}
               ]
 
-//config
 
+
+
+//config
+Dropzone.autoDiscover = false;
+var myDropzone = new Dropzone(".dropzone",);
+myDropzone.on("success", function(data) {
+  setTimeout(function(){
+    $('.previewsContainer').fadeOut(300)
+  },3000)
+
+CKEDITOR.editorConfig = function( config ) {
+	// Define changes to default configuration here. For example:
+
+  var  Custom = [
+        //{'name': 'document', 'items': ['Source']},
+        {'name': 'clipboard', 'items': ['Print', 'Undo', 'Redo', 'Cut','Copy']},//'Paste', 'PasteText', 'PasteFromWord', '-']},
+        {'name': 'insert','items': ['SpecialChar','Embedbase', 'Youtube','Table']},
+        {'name': 'basicstyles','items': ['Bold', 'Italic']},
+        {'name': 'paragraph','items': ['NumberedList', 'BulletedList','Blockquote','Embed']},
+        {'name': 'links', 'items': ['Link', 'Unlink']},
+        //{'name': 'styles', 'items': ['Styles', 'Format']},
+        //{'name': 'colors', 'items': ['TextColor', 'BGColor']},
+        //{'name': 'tools', 'items': ['Maximize', 'ShowBlocks']},
+
+    ]
+   config.contentsCss = ["body {font-size: 18px;color:#3b3b3b;font-family:Helvetica Neue,Helvetica,Arial,sans-serif}"],
+	 config.language = 'ru';
+   config.scayt_autoStartup = false;
+	 //config.uiColor = '#f00';
+   config.toolbar=  Custom;
+   config.removePlugins = 'elementspath'
+};
 
 
 moment.locale("ru");
 var socket = io.connect({secure: true});
 var csrf_token = "{{csrf_token}}"
+
+
+
 //config
 
 
@@ -166,7 +211,7 @@ var NOTY = function (timeout,type,text){
 }
 
 $(document).ready(function(){
-
+  $('.ckeditor-init').ckeditor();
   notifyMe()
   var chat_crypt = true
   //var chat_crypt = false

@@ -1,11 +1,36 @@
 {% load thumbnail %}
 
+<style>
+
+  .stream_block{
+    background:#fff;
+    padding:10px;
+  }
+
+</style>
+
 <div class="col-sm-1 col-xs-1"></div>
 <div class="col-sm-8 col-xs-10" style="margin:75px 0px">
 
+<div class="col-sm-11 col-xs-11 side-one stream_block">
+  <div  rows="1" placeholder="НАПИСАТЬ СООБЩЕНИЕ">
+    <span>НАПИСАТЬ СООБЩЕНИЕ...</span>
+  </div>
+  <br>
+  <br>
+
+  <div class="col-sm-12 col-xs-12 reply-main dropzone">
+  <textarea id="send_post" class="form-control upload-dropzone ckeditor-init" rows="1" placeholder="НАПИСАТЬ СООБЩЕНИЕ"></textarea>
+  <br>
+  <button class="btn btn-primary">Отправить</button>
+  </div>
+</div>
+
+
+
     {% for item in posts %}
       <div class="side-one">
-        <div class="row" style="background:#fff;padding:10px;">
+        <div class="row stream_block">
 
           <div class="col-sm-1 col-xs-1 heading-avatar">
             <div class="heading-avatar-icon">

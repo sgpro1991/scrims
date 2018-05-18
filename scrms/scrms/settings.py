@@ -42,7 +42,8 @@ INSTALLED_APPS = [
     'main.apps.MainConfig',
     'users.apps.UsersConfig',
     'rest_framework',
-    'rest.apps.RestConfig'
+    'rest.apps.RestConfig',
+    'ckeditor'
 ]
 
 MIDDLEWARE = [
@@ -89,6 +90,13 @@ DATABASES = {
         'HOST' : '0.0.0.0',
         'PORT' : '3030',
     }
+}
+
+
+CKEDITOR_CONFIGS = {
+    'awesome_ckeditor': {
+        'toolbar': 'Basic',
+    },
 }
 
 
